@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Temptations</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/imgs/theme/logoz.png">
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="/assets/css/main.css?v=3.4">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="./assets/js/main.js?v=3.4"></script>
+    <script src="./assets/js/shop.js?v=3.4"></script>
+
+
+
+    
+</head>
+<body>
+
+    <%- include('../partials/navbar.ejs') %>
+  
+      <page> <%-body %> </page>
+  
+  
+      <%- include('../partials/footer.ejs') %>
+  
+      <div
+      id="cart-message"
+      class="position-fixed p-2 rounded"
+      style="bottom: 20px; right: 20px; display: none; z-index: 999"
+    ></div>
+  
+      
+  </body>
+  
+  </html>

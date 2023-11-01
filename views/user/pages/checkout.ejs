@@ -1,0 +1,331 @@
+
+ <main class="main">
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="/" rel="nofollow">Home</a>
+                    <span></span> Shop
+                    <span></span> Checkout
+                </div>
+            </div>
+        </div>
+        <section class="mt-50 mb-50">
+            <div class="container">
+                <div class="row">
+                    
+                    <div class="col-lg-6">
+                        <div class="toggle_info">
+                            <span><i class="fi-rs-label mr-10"></i><span class="text-muted">Have a coupon?</span> <a href="#coupon" data-bs-toggle="collapse" class="collapsed" aria-expanded="false">Click here to enter your code</a></span>
+                        </div>
+                        <div class="panel-collapse collapse coupon_form " id="coupon">
+                            <div class="panel-body">
+                                <p class="mb-30 font-sm">If you have a coupon code, please apply it below.</p>
+                                <form method="post">
+                                    <div class="form-group">
+                                        <input type="text" placeholder="Enter Coupon Code...">
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn  btn-md" name="login">Apply Coupon</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="divider mt-50 mb-50"></div>
+                    </div>
+                </div>
+                <form action="/place-order" method="post">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-25">
+                            
+                        </div>
+                        <!-- <form method="post"> -->
+                            <div class="mb-20">
+                                <h5>Additional information</h5>
+                            </div>
+                            <div class="form-group mb-30">
+                                <!-- Use inline styles to set the width and height -->
+                                <textarea rows="3" style="width: 300px; height: 50px;" placeholder="Order notes"></textarea>
+                            </div>
+                        <!-- </form> -->
+                        
+                        
+                        
+                        
+                        <div class="col-lg-6 col-md-12 col-12">
+                            <div class="checkbox-form">
+                                <div class="d-flex">
+                                    <h3>Select Address</h3>
+                                    <a href="/addAddress" class="btn btn-sm btn-dark" title="Add New Address">Add</a>
+                                </div>
+                                <div class="different-address">
+                                    <div id="" class="row">
+                                        <% if (address && address.length) { %> <% address.forEach((item, index) => { %>
+                                        <div class="col-md-8 mb-3">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-between align-items-center">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="addressId"
+                                                        id="address<%= index %>" value="<%= item._id %>" required <%= index ===
+                                                        0 ? "checked" : "" %> />
+                                                        <label class="form-check-label" for="address<%= index %>">
+                                                            <h5 class="card-title"><%= item.title %></h5>
+                                                            <p class="card-text">
+                                                                <%= item.street %>, <%= item.city %>, <%= item.state %>, <%=
+                                                                item.pincode %>
+                                                            </p>
+                                                            <p class="card-text">Mobile: +91 <%= item.mobile %></p>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% }) %> <% } else { %> No Address Found
+                                        <!-- <a class="btn btn-dark h-auto" href="/addAddress">Add Address</a> -->
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-6">
+                        <div class="order_review">
+                            <div class="mb-20">
+                                <h4>Your Orders</h4>
+                                <input
+                                type="hidden"
+                                id="originalCartData"
+                                name="currentCartData"
+                                value="<%= JSON.stringify(cartData) %>"
+                            />
+                            </div>
+                            <div class="your-order-table table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th class="product-name">Product</th>
+                                            <th class="product-total">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% product.forEach(item => { %>
+                                        <tr class="cart_item">
+                                            <td class="product-name">
+                                                <% if (item.product.title.length > 36) { %>
+                                                <small><%= item.product.title.substring(0, 36) + '...' %></small> <% } else
+                                                { %> <small><%= item.product.title %></small> <% } %>
+                                                <strong class="product-quantity"> × <%= item.quantity %></strong>
+                                            </td>
+
+                                            <td class="product-total">
+                                                <span class="amount">₹ <%= item.product.salePrice * item.quantity %></span>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="cart-subtotal">
+                                            <th>Cart Subtotal</th>
+                                            <td><span class="amount">₹ <%= subtotal %></span></td>
+                                        </tr>
+            
+                                        
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                            <div class="payment_method">
+                                <div class="mb-25">
+                                    
+                                </div>
+                                
+                                <div class="payment-method">
+                                <div class="payment-accordion">
+                                    <div class="payment-method">
+                                        <label for="payment-method-select">Select Payment Method:</label>
+                                    </div>
+                                    <% if (address && address.length) { %>
+                                    <div class="order-button-payment d-flex flex-column gap-2">
+                                        <button
+                                            type="button"
+                                            class="btn btn-fill-out btn-block mt-30"
+                                            style="padding: 12px"
+                                            id="cod-button"
+                                        >
+                                            CASH ON DELIVERY
+                                        </button>
+                                        
+                                        
+                                    </div>
+                                    <% } else { %> <span class="text-danger">Please Add an Address</span> <% } %>
+                                </div>
+                            </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Checkout Area End -->
+   
+    <script>
+        let selectedAddressId = null;
+        
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.querySelector("form");
+            
+            const codBtn = document.getElementById("cod-button");
+            console.log(1)
+            
+            const addressRadios = document.querySelectorAll('input[name="addressId"]');
+            
+
+            const firstRadio = document.querySelector('input[name="addressId"]:checked');
+            if (firstRadio) {
+                selectedAddressId = firstRadio.value;
+            }
+
+            addressRadios.forEach((radio) => {
+                radio.addEventListener("change", (event) => {
+                    selectedAddressId = event.target.value;
+                });
+            });
+
+            codBtn.addEventListener("click", handleCodButtonClick);
+            console.log(2)
+            
+        });
+
+        
+
+        async function handleCodButtonClick(event) {
+    event.preventDefault();
+    if (await checkCartData()) {
+        const data = {
+            addressId: selectedAddressId,
+            payment_method: "cash_on_delivery",  // Make sure this is set correctly
+        };
+        await placeOrder("/place-order", data);
+    }
+}
+
+
+        
+
+        async function placeOrder(url, data) {
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                const responseData = await response.json();
+                if (data.payment_method === "cash_on_delivery") {
+                    handleCodPayment(responseData);
+                } 
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        async function checkCartData() {
+            try {
+                console.log(3)
+                const originalCartData = JSON.parse(document.getElementById("originalCartData").value);
+                const response = await fetch("/checkout/get");
+
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+
+                const currentCartData = await response.json();
+
+                if (currentCartData !== null && compareJSONStrings(originalCartData, currentCartData)) {
+                    showCartConfirmation();
+                    return false;
+                }        
+console.log(4)
+
+                return true;
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        
+
+        function compareJSONStrings(jsonString1, jsonString2) {
+            return JSON.stringify(jsonString1) !== JSON.stringify(jsonString2);
+
+            console.log(5)
+        }
+
+        function showCartConfirmation() {
+            Swal.fire({
+                title: "Cart Confirmation",
+                text: "Your cart has changed. Do you want to reload the page?",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Reload",
+                cancelButtonText: "Close",
+            }).then((result) => { 
+                if (result.isConfirmed) {
+                    proceedToCheckout();
+                }
+            });
+        }
+
+        function proceedToCheckout() {
+            window.location.reload();
+        }
+
+        function handleCodPayment(responseData) {
+            window.location.href = `/order-placed/${responseData.orderId}`;
+
+            console.log(6)
+        }
+
+        async function handlePaymentFailure(orderId) {
+            try {
+                const cancelOrderUrl = `/orders/${orderId}`;
+                const requestOptions = {
+                    method: "PUT",
+                };
+                const response = await fetch(cancelOrderUrl, requestOptions);
+
+                if (response.ok) {
+                    console.log("Order cancellation request succeeded.");
+                    return response.json();
+                } else {
+                    console.error("Order cancellation request failed.");
+                }
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        function handleError(error) {
+            console.error("Error:", error);
+        }
+
+        
+
+
+
+</script>
+        

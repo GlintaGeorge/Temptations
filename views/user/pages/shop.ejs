@@ -1,0 +1,165 @@
+﻿<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" rel="nofollow">Home</a>
+                <span></span> Shop
+            </div>
+        </div>
+    </div>
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row flex-row-reverse">
+                <div class="col-lg-9">
+                    <div class="shop-product-fillter">
+                        <div class="totall-product">
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row product-grid-3">
+                        <% if (products.length>0) { %>
+
+                            <% products.forEach(element=> { %>
+
+                                <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+                                    <div class="product-cart-wrap mb-30">
+                                        <div class="product-img-action-wrap">
+
+                                            <% if (Array.isArray(element.images) && element.images.length> 0) { %>
+
+                                                <div class="product-img product-img-zoom">
+
+                                                    <a href="/products/<%=element?._id%>">
+                                                        <img class="default-img" src="<%= element.images[0].imageUrl %>"
+                                                            alt="ProductImage">
+                                                        <img class="hover-img" src="<%= element.images[0].imageUrl %>"
+                                                            alt="ProductImage">
+                                                    </a>
+                                                </div>
+                                                <% }else { %>
+                                                    <span> No images available</span>
+                                                    <% } %>
+
+                                                        <div class="product-action-1">
+
+                                                            <a aria-label="Add To Wishlist" class="action-btn hover-up"
+                                                                href="shop-wishlist.html"><i
+                                                                    class="fi-rs-heart"></i></a>
+
+                                                        </div>
+
+                                        </div>
+                                        <div class="product-content-wrap">
+
+                                            <h2><a href="/products/<%=element?._id%>">
+                                                    <%=element.title%>
+                                                </a></h2>
+                                            <div class="rating-result" title="90%">
+                                                <span>
+                                                    <span>90%</span>
+                                                </span>
+                                            </div>
+                                            <div class="product-price">
+
+
+                                                <span>₹<%= (element.salePrice).toLocaleString() %></span>
+                                                <span class="old-price"> ₹<%= (element.productPrice).toLocaleString() %>
+                                                        </span>
+                                            </div>
+                                            <div class="product-action-1 show">
+                                                <a aria-label="Add To Cart" class="action-btn hover-up" href="/cart"><i
+                                                        class="fi-rs-shopping-bag-add"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+
+                                    <% } else { %>
+                                        <h2>No Products found</h2>
+                                        <% } %>
+
+                    </div>
+
+
+                    <!--pagination refer from original here deleted -->
+
+                    <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-start">
+                                <% if (currentPage> 1) { %>
+                                    <li class="page-item active"><a class="page-link"
+                                            href="?p=<%= parseInt(currentPage) - 1 %>"></a>
+                                    </li>
+                                    <% }  %> 
+                                       
+    
+                                            <% for (let i=1; i <=totalPages; i++) { %>
+                                                <li class="page-item<%= i === currentPage ? 'active' : '' %>">
+                                                    <a class="page-link" href="?p=<%= i %>">
+                                                        <%= i %>
+                                                    </a>
+                                                </li>
+                                                <% } %>
+    
+                                                    <% if (currentPage < totalPages) { %>
+                                                        <li class="page-item"><a class="page-link" href="?p=<%= parseInt(currentPage) + 1 %>">
+                                                                <i class="ti-angle-right"></i></a>
+                                                        </li>
+                                                        <% } else { %>
+                                                            <li class="page-item"><a class="page-link"><i
+                                                                        class="fi-rs-angle-double-small-right"></i></a>
+                                                            </li>
+                                                            <% } %>
+    
+                            </ul>
+                        </nav>
+                                  
+                    </div>
+
+                </div>
+                <div class="col-lg-3 primary-sidebar sticky-sidebar">
+                    <div class="widget-category mb-30">
+                        <h5 class="section-title style-1 mb-30 wow fadeIn animated">Category</h5>
+                        <ul class="categories">
+                            <li><a href="shop-grid-right.html">Eggless Cakes</a></li>
+                            <li><a href="shop-grid-right.html">Gourmet Cakes</a></li>
+                            <li><a href="shop-grid-right.html">Designer Cakes</a></li>
+
+                        </ul>
+                    </div>
+                    <!-- Fillter By Price -->
+                    <div class="sidebar-widget price_range range mb-30">
+                        <div class="widget-header position-relative mb-20 pb-10">
+                            <h5 class="widget-title mb-10">Fill by price</h5>
+                            <div class="bt-1 border-color-1"></div>
+                        </div>
+                        <div class="price-filter">
+                            <div class="price-filter-inner">
+                                <div id="slider-range"></div>
+                                <div class="price_slider_amount">
+                                    <div class="label-input">
+                                        <span>Range:</span><input type="text" id="amount" name="price"
+                                            placeholder="Add Your Price" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="shop-grid-right.html" class="btn btn-sm btn-default"><i class="fi-rs-filter mr-5"></i>
+                            Fillter</a>
+                    </div>
+                </div>
+
+                
+
+
+
+            </div>
+        </div>
+        </div>
+    </section>
+</main>

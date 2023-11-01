@@ -1,0 +1,146 @@
+﻿<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" rel="nofollow">Home</a>
+                <span></span> Shop
+                <span></span> Product Details
+            </div>
+        </div>
+    </div>
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="product-detail accordion-detail">
+                        <div class="row mb-50">
+                            <div class="col-md-6 col-sm-12 col-xs-12">
+                                <div class="detail-gallery">
+                                    <span class="zoom-icon"><i class="fi-rs-search"></i></span>
+                                    <!-- MAIN SLIDES -->
+                                    <div class="product-image-slider">
+
+                                        <% getalldata.images.forEach(img=>{ %>
+                                            <figure class="border-radius-10">
+                                                <img src="<%= img.imageUrl %>" alt="product image">
+                                            </figure>
+                                            <% }) %>
+                                    </div>
+                                    <!-- THUMBNAILS -->
+                                    <div class="slider-nav-thumbnails pl-15 pr-15">
+                                        <% getalldata.images.forEach(img=>{ %>
+                                            <div><img src="<%= img.thumbnailUrl %> alt=" product image"></div>
+                                            <% }) %>
+
+
+                                    </div>
+                                </div>
+                                <!-- End Gallery -->
+                            </div>
+                            <div class="col-md-6 col-sm-12 col-xs-12">
+                                <div class="detail-info">
+                                    <h2 class="title-detail">
+                                        <%= getalldata.title %>
+                                    </h2>
+                                    <div class="product-detail-rating">
+
+                                        <!-- <div class="product-rate-cover text-end">
+                                            <div class="product-rate d-inline-block">
+                                                <div class="product-rating" style="width:90%">
+                                                </div>
+                                            </div>
+                                           
+                                        </div> -->
+                                    </div>
+                                    <div class="clearfix product-price-cover">
+                                        <div class="product-price primary-color float-left">
+                                            <ins><span class="text-brand">₹<%= getalldata.salePrice %></span></ins>
+                                            <ins> <span class="old-price font-md ml-15">₹<%= getalldata.productPrice %>
+                                                        </span></ins>
+
+                                        </div>
+                                    </div>
+                                    <div class="bt-1 border-color-1 mt-15 mb-15"></div>
+                                    <div class="short-desc mb-30">
+                                        <h5>
+                                            <%= getalldata.description %>
+                                        </h5>
+                                    </div>
+                                    <div class="product_sort_info font-xs mb-30">
+                                        <ul>
+
+                                            <!-- <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day Return Policy -->
+                                            <!-- </li> -->
+                                            <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="attr-detail attr-size">
+                                        <strong class="mr-10">Weight</strong>
+                                        <ul class="list-filter size-filter font-small">
+                                            <li><a href="#">500gms</a></li>
+                                            <li class="active"><a href="#">1kg</a></li>
+                                            <li><a href="#">2kg</a></li>
+                                            <li><a href="#">4kg</a></li>
+                                            <li><a href="#">5kg</a></li>
+
+                                        </ul>
+                                    </div>
+                                    <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                                    <!-- <div class="detail-extralink"> -->
+
+                                        <div class="product-extra-link2">
+                                            <!-- <button type="submit" class="button button-add-to-cart" >Add to cart </button> -->
+                                            <a href="/add/<%= getalldata._id %>" class="button button-add-to-cart" style="display: inline-block; padding: 10px 90px; margin-left: 10px">
+                                                <h5 class="ml-0">Addtocart</h5>
+                                            </a>
+                                            
+
+                                            <!-- <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#"><i
+                                                    class="fi-rs-heart"></i></a> -->
+                                        </div>
+                                    <!-- </div> -->
+
+                                </div>
+                                <!-- Detail Info -->
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-10 m-auto entry-main-content">
+                                <h2 class="section-title style-1 mb-30">Description</h2>
+                                <div class="description mb-50">
+
+
+                                    <%= getalldata.description %>
+
+
+                                </div>
+
+
+                                <div class="social-icons single-share">
+                                    <ul class="text-grey-5 d-inline-block">
+
+                                        <li class="social-facebook"><a href="#"><img
+                                                    src="assets/imgs/theme/icons/icon-facebook.svg" alt=""></a></li>
+                                        <li class="social-twitter"> <a href="#"><img
+                                                    src="assets/imgs/theme/icons/icon-twitter.svg" alt=""></a></li>
+                                        <li class="social-instagram"><a href="#"><img
+                                                    src="assets/imgs/theme/icons/icon-instagram.svg" alt=""></a></li>
+                                        <li class="social-linkedin"><a href="#"><img
+                                                    src="assets/imgs/theme/icons/icon-pinterest.svg" alt=""></a></li>
+                                    </ul>
+                                </div>
+
+
+
+
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
