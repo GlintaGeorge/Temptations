@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const Order = require("../models/orderModel");
 const Product = require("../models/productModel");
-
+const {status} =  require("../utility/status")
 const OrderItem = require("../models/orderItemModel");
 
 module.exports = {
@@ -74,7 +74,12 @@ module.exports = {
             status: status.cancelled,
         });
 
-       
+        if (updatedOrder.isPaid !== "pending") {
+            const cancelledProduct = await Product.findById(updatedOrder.product);
+            cancelledProduct.quantity += updatedOrder.quantity;
+            cancelledProduct.sold -= updatedOrder.quantity;
+            await cancelledProduct.save();
+        }
     }),
 
     returnOrder: asyncHandler(async (returnOrderId) => {

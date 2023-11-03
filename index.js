@@ -13,6 +13,7 @@ const expressLayouts = require('express-ejs-layouts')
 require('dotenv').config()
 const dataBase = require('./config/dataBase')
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
+const methodOverride= require('method-override')
 
 // importing routes--
 const adminRoute = require('./routes/adminRoute')
@@ -30,7 +31,7 @@ dataBase.dbConnect();
 
 // Middleware
 app.use(nocache())
-// app.use(logger('dev'));
+app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -80,6 +81,7 @@ app.use(expressLayouts)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+app.use(methodOverride('_method'));
 
 // Routes-----
 app.use('/admin', adminRoute) // user routes

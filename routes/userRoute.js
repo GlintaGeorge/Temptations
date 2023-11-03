@@ -7,15 +7,16 @@ const cartController = require('../controller/cartControl')
 const addressController = require('../controller/addressControl')
 const checkoutController = require("../controller/checkoutControl");
 const orderController = require("../controller/orderControl");
-
+const methodOverride = require('method-override');
 const { ensureNotAuthenticated, ensureAuthenticated } = require('../middlewares/userAuth')
 const validateID = require('../middlewares/idValidation')
 
 userRoute.use((req, res, next) => {
     req.app.set('layout', 'user/layout/user');
-    console.log("2")
     next();
   })
+
+  userRoute.use(methodOverride('_method'));
 
 // userRoute setting----
 userRoute.get('/', userController.loadLandingPage); /* Loading home page */
@@ -30,12 +31,12 @@ userRoute.get('/reSendOTP', ensureNotAuthenticated, userController.reSendOTP); /
 userRoute.post('/reSendOTP', ensureNotAuthenticated, userController.verifyResendOTP);
 
 
-userRoute.get('/login',userController.loadLogin);/*loading login page */
+// userRoute.get('/login',userController.loadLogin);/*loading login page */
 userRoute.get('/shop',userController.loadShop);// loading shop page
 userRoute.get('/about',userController.loadAbout);// loading about page
 userRoute.get('/contact',userController.loadContact);// loading contact page
 userRoute.post('/shop/search', userController.search);// searching....
-
+userRoute.get('/changePassword',userController.changePassword)// changePassword
 
 
 // Login & Verification section---
@@ -83,7 +84,7 @@ userRoute.post("/update", checkoutController.updateCheckoutPage);
 userRoute.get("/orders", orderController.orderspage);
 userRoute.get("/orders/:id", orderController.singleOrder);
 userRoute.put("/orders/:id", orderController.cancelOrder);
-userRoute.put("/orders/single/:id", orderController.cancelSingleOrder);
+userRoute.post("/orders/single/:id", orderController.cancelSingleOrder);
 userRoute.post("/orders/return/:id", orderController.returnOrder);
 
 

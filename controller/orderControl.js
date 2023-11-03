@@ -14,8 +14,8 @@ const orderItem=require("../models/orderItemModel")
  */
 exports.orderspage = asyncHandler(async (req, res) => {
     try {
+        console.log('uhjik',req.user);
         const userId = req.user._id;
-console.log(userId);
         const orders = await getOrders(userId);
 
         res.render("user/pages/orders", {
@@ -77,12 +77,15 @@ exports.cancelOrder = asyncHandler(async (req, res) => {
  */
 exports.cancelSingleOrder = asyncHandler(async (req, res) => {
     try {
+        
         const orderItemId = req.params.id;
+        console.log('sdfghj');
 
         const result = await cancelSingleOrder(orderItemId, req.user._id);
-
+        return res.redirect("/orders");
         if (result === "redirectBack") {
-            res.redirect("back");
+            console.log('swedrftgyhujik');
+       
         } else {
             res.json(result);
         }

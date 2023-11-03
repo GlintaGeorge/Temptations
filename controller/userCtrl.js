@@ -206,6 +206,15 @@ const userProfile = asyncHandler(async (req, res) => {
     }
 });
 
+const changePassword = asyncHandler(async  (req, res)=>{
+    try {
+        res.render('./user/pages/changePassword')
+
+    } catch(error){
+        throw new Error(error);
+    }
+});
+
 
 // loading shop page---
 const  loadShop = asyncHandler(async (req, res) => {
@@ -348,7 +357,8 @@ module.exports={
     verifyOTP,
     sendOTPpage,
     loadProduct,
-    search
+    search,
+    changePassword
 
 
 

@@ -49,6 +49,11 @@ const orderSchema = new mongoose.Schema({
     },
     deliveredDate: {
         type: Date
+    },
+    payment_method:{
+        type: String,
+        required: true
+
     }
     
     

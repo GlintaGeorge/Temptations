@@ -69,7 +69,7 @@
                                 <% } else if (order.isPaid === "pending") {%>
                                     <p class="card-text"><strong>Payment Status: </strong><span class="capitalize text-danger"><%= order.isPaid %></span></p>
                                 <% } %>
-                                
+                                <!-- <p class="card-text"><strong>Payment Status:</strong><span class="capitalize text-success"> cod</span></p> -->
                                 <!-- Quantity -->
                                 <p class="card-text">
                                     <strong>Quantity:</strong>
@@ -133,7 +133,7 @@
             </div>
             <div class="modal-body">Are you sure you want to cancel this order?</div>
             <div class="modal-footer">
-                <form action="/orders/single/<%= order._id %>?_method=PUT" method="post">
+                <form action="/orders/single/<%= order._id %>" method="post">
                     <button type="submit" class="btn btn-danger h-auto" id="confirmCancelBtn">Confirm</button>
                 </form>
                 <button type="button" class="btn btn-secondary h-auto" data-dismiss="modal">Cancel</button>

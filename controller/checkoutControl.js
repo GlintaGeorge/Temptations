@@ -6,7 +6,7 @@ const Order = require("../models/orderModel");
 const Product = require("../models/productModel");
 const validateMongoDbId = require("../utility/validateMongodbId");
 const OrderItems = require("../models/orderItemModel");
-
+const Coupon = require("../models/couponModel");
 
 /**
  * Checkout Page Route
@@ -18,13 +18,24 @@ exports.checkoutpage = asyncHandler(async (req, res) => {
         const user = await User.findById(userid).populate("addresses");
         const cartItems = await checkoutHelper.getCartItems(userid);
         const cartData = await Cart.findOne({ user: userid });
-         
+        const coupon =
+        (await Coupon.findOne({ code: req?.session?.coupon?.code, expiryDate: { $gt: Date.now() } })) || null;
+    const availableCoupons = await Coupon.find({ expiryDate: { $gt: Date.now() } })
+        .select({ code: 1, _id: 0 })
+        .limit(4);
+
+    if (!wallet) {
+        wallet = await Wallet.create({
+            user: userid,
+        });
+    }
 
         if (cartItems) {
             const { subtotal, total } = await checkoutHelper.calculateTotalPrice(
                 cartItems,
                 userid,
-                false
+                false,
+                coupon
                 
             );
 
@@ -32,6 +43,11 @@ exports.checkoutpage = asyncHandler(async (req, res) => {
                 res.redirect("/cart");
             }
 
+            let couponMessage = {};
+            if (!coupon) {
+                const coupons = availableCoupons.map((coupon) => coupon.code).join(" | ");
+                couponMessage = { status: "text-info", message: "Try " + coupons };
+            }
             
 
             res.render("user/pages/checkout", {
@@ -41,7 +57,10 @@ exports.checkoutpage = asyncHandler(async (req, res) => {
                 product: cartItems.products,
                 total,
                 subtotal,
-                cartData
+                cartData,
+                coupon,
+                couponMessage,
+
                 
             
                 
@@ -61,7 +80,9 @@ exports.placeOrder = asyncHandler(async (req, res) => {
         const userId = req.user._id;
         const { addressId, payment_method } = req.body;  // Retrieve payment_method from the request body
         console.log("9999999999900000000000000000");
-        const newOrder = await checkoutHelper.placeOrder(userId, addressId, payment_method);  // Use payment_method here
+        const couponCode = req.session.coupon ? req.session.coupon.code : null;
+        const coupon = (await Coupon.findOne({ code: couponCode, expiryDate: { $gt: Date.now() } })) || null;
+        const newOrder = await checkoutHelper.placeOrder(userId, addressId, payment_method,coupon);  // Use payment_method here
 
         if (payment_method === "cash_on_delivery") {
             console.log("9999999999999999999999999");
