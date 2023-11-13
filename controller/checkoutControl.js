@@ -3,40 +3,43 @@ const checkoutHelper = require("../helpers/checkoutHelper");
 const User = require("../models/usermodel");
 const Cart = require("../models/cartModel");
 const Order = require("../models/orderModel");
+const Razorpay = require("razorpay");
 const Product = require("../models/productModel");
 const validateMongoDbId = require("../utility/validateMongodbId");
 const OrderItems = require("../models/orderItemModel");
+const Wallet = require("../models/walletModel");
+const WalletTransaction = require("../models/walletTransactionModel");
 const Coupon = require("../models/couponModel");
 
 /**
  * Checkout Page Route
  * Method POST
  */
-exports.checkoutpage = asyncHandler(async (req, res) => {
+const checkoutpage = asyncHandler(async (req, res) => {
     try {
         const userid = req.user._id;
         const user = await User.findById(userid).populate("addresses");
         const cartItems = await checkoutHelper.getCartItems(userid);
         const cartData = await Cart.findOne({ user: userid });
+        let wallet = await Wallet.findOne({ user: userid });
         const coupon =
-        (await Coupon.findOne({ code: req?.session?.coupon?.code, expiryDate: { $gt: Date.now() } })) || null;
-    const availableCoupons = await Coupon.find({ expiryDate: { $gt: Date.now() } })
-        .select({ code: 1, _id: 0 })
-        .limit(4);
+            (await Coupon.findOne({ code: req?.session?.coupon?.code, expiryDate: { $gt: Date.now() } })) || null;
+        const availableCoupons = await Coupon.find({ expiryDate: { $gt: Date.now() } })
+            .select({ code: 1, _id: 0 })
+            .limit(4);
 
-    if (!wallet) {
-        wallet = await Wallet.create({
-            user: userid,
-        });
-    }
+        if (!wallet) {
+            wallet = await Wallet.create({
+                user: userid,
+            });
+        }
 
         if (cartItems) {
-            const { subtotal, total } = await checkoutHelper.calculateTotalPrice(
+            const { subtotal, total, discount } = await checkoutHelper.calculateTotalPrice(
                 cartItems,
                 userid,
                 false,
                 coupon
-                
             );
 
             if (!cartItems.products.length) {
@@ -48,7 +51,6 @@ exports.checkoutpage = asyncHandler(async (req, res) => {
                 const coupons = availableCoupons.map((coupon) => coupon.code).join(" | ");
                 couponMessage = { status: "text-info", message: "Try " + coupons };
             }
-            
 
             res.render("user/pages/checkout", {
                 title: "Checkout",
@@ -58,12 +60,10 @@ exports.checkoutpage = asyncHandler(async (req, res) => {
                 total,
                 subtotal,
                 cartData,
+                wallet,
+                discount,
                 coupon,
                 couponMessage,
-
-                
-            
-                
             });
         }
     } catch (error) {
@@ -75,17 +75,84 @@ exports.checkoutpage = asyncHandler(async (req, res) => {
  * Checkout Page Route
  * Method GET
  */
-exports.placeOrder = asyncHandler(async (req, res) => {
+const placeOrder = asyncHandler(async (req, res) => {
     try {
         const userId = req.user._id;
-        const { addressId, payment_method } = req.body;  // Retrieve payment_method from the request body
-        console.log("9999999999900000000000000000");
+        const { addressId, payment_method, isWallet } = req.body;
+        console.log("Session Coupon:", req.session.coupon);
         const couponCode = req.session.coupon ? req.session.coupon.code : null;
-        const coupon = (await Coupon.findOne({ code: couponCode, expiryDate: { $gt: Date.now() } })) || null;
-        const newOrder = await checkoutHelper.placeOrder(userId, addressId, payment_method,coupon);  // Use payment_method here
 
+        const coupon = (await Coupon.findOne({ code: couponCode, expiryDate: { $gt: Date.now() } })) || null;
+        // const coupon = (await Coupon.findOne({ code: req.session.coupon.code, expiryDate: { $gt: Date.now() } })) || null;
+
+        const newOrder = await checkoutHelper.placeOrder(userId, addressId, payment_method, isWallet, coupon);
         if (payment_method === "cash_on_delivery") {
-            console.log("9999999999999999999999999");
+            res.status(200).json({
+                message: "Order placed successfully",
+                orderId: newOrder._id,
+            });
+        } else if (payment_method === "online_payment") {
+            const user = await User.findById(req.user._id);
+            const wallet = await Wallet.findOne({ user: userId });
+            let totalAmount = 0;
+
+            if (isWallet) {
+                totalAmount = newOrder.totalPrice;
+                totalAmount -= wallet.balance;
+                newOrder.paidAmount = totalAmount;
+                newOrder.wallet = wallet.balance;
+                await newOrder.save();
+                const walletTransaction = await WalletTransaction.create({
+                    wallet: wallet._id,
+                    event: "Order Placed",
+                    orderId: newOrder.orderId,
+                    amount: wallet.balance,
+                    type: "debit",
+                });
+            } else if (!isWallet) {
+                totalAmount = newOrder.totalPrice;
+                newOrder.paidAmount = totalAmount;
+                await newOrder.save();
+            }
+
+            var instance = new Razorpay({
+                key_id: process.env.RAZORPAY_KEY_ID,
+                key_secret: process.env.RAZORPAY_KEY_SECRET,
+            });
+            const rzp_order = instance.orders.create(
+                {
+                    amount: totalAmount * 100,
+                    currency: "INR",
+                    receipt: newOrder.orderId,
+                },
+                (err, order) => {
+                    if (err) {
+                        res.status(500).json(err);
+                    }
+                    res.status(200).json({
+                        message: "Order placed successfully",
+                        rzp_order,
+                        order,
+                        user,
+                        walletAmount: wallet?.balance,
+                        orderId: newOrder._id,
+                    });
+                }
+            );
+        } else if (payment_method === "wallet_payment") {
+            //  Wallet payment redirect
+            const wallet = await Wallet.findOne({ user: userId });
+            wallet.balance -= newOrder.wallet;
+            wallet.save();
+            newOrder.wallet = newOrder.totalPrice;
+            await newOrder.save();
+            const walletTransaction = WalletTransaction.create({
+                wallet: wallet._id,
+                event: "Order Placed",
+                orderId: newOrder.orderId,
+                amount: newOrder.totalPrice,
+                type: "debit",
+            });
             res.status(200).json({
                 message: "Order placed successfully",
                 orderId: newOrder._id,
@@ -98,11 +165,10 @@ exports.placeOrder = asyncHandler(async (req, res) => {
     }
 });
 
-
 /**
  * Get Cart Data
  */
-exports.getCartData = asyncHandler(async (req, res) => {
+const getCartData = asyncHandler(async (req, res) => {
     try {
         const userId = req.user._id;
         const cartData = await Cart.findOne({ user: userId });
@@ -116,12 +182,18 @@ exports.getCartData = asyncHandler(async (req, res) => {
  * Order Placed
  * Method GET
  */
-exports.orderPlaced = asyncHandler(async (req, res) => {
+const orderPlaced = asyncHandler(async (req, res) => {
     try {
         const orderId = req.params.id;
         
-        const userId = req.user._id;
+        
+        console.log("Session Coupon:", req.session.coupon);
+        const couponCode = req.session.coupon ? req.session.coupon.code : null;
 
+        const coupon = (await Coupon.findOne({ code: couponCode, expiryDate: { $gt: Date.now() } })) || null;
+        // const coupon = (await Coupon.findOne({ code: req.session.coupon.code })) || null;
+        const userId = req.user._id;
+        console.log(userId)
         // Populate the order details, including product details
         const order = await Order.findById(orderId).populate({
             path: "orderItems",
@@ -137,8 +209,31 @@ exports.orderPlaced = asyncHandler(async (req, res) => {
                 item.isPaid = "cod";
                 await item.save();
             }
+        } else if (order.payment_method === "online_payment") {
+            for (const item of order.orderItems) {
+                item.isPaid = "paid";
+                await item.save();
+            }
+            if (coupon) {
+                coupon.usedBy.push(userId);
+                await coupon.save();
+            }
+            const wallet = await Wallet.findOne({ user: req.user._id });
+            wallet.balance = 0;
+            await wallet.save();
+        } else if (order.payment_method === "wallet_payment") {
+            for (const item of order.orderItems) {
+                item.isPaid = "paid";
+                await item.save();
+            }
+            if (coupon) {
+                coupon.usedBy.push(userId);
+                await coupon.save();
+            }
+            const wallet = await Wallet.findOne({ user: req.user._id });
+            wallet.balance -= order.totalPrice;
+            await wallet.save();
         }
-        
         if (cartItems) {
             for (const cartItem of cartItems.products) {
                 const updateProduct = await Product.findById(cartItem.product._id);
@@ -149,7 +244,7 @@ exports.orderPlaced = asyncHandler(async (req, res) => {
             }
         }
 
-        
+        req.session.coupon = null;
 
         // Render the order placed page with orderDetails
         res.render("user/pages/orderPlaced", {
@@ -162,25 +257,151 @@ exports.orderPlaced = asyncHandler(async (req, res) => {
     }
 });
 
-
-exports.updateCheckoutPage = asyncHandler(async (req, res) => {
+/**
+ * Vefify Payment
+ * Method POST
+ */
+const verifyPayment = asyncHandler(async (req, res) => {
     try {
-        const userid = req.user._id;
-       
-        const user = await User.findById(userid).populate("addresses");
-        const cartItems = await checkoutHelper.getCartItems(userid);
+        const { razorpay_payment_id, razorpay_order_id, razorpay_signature, orderId, walletAmount, userId } = req.body;
+        const result = await checkoutHelper.verifyPayment(
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+            orderId
+        );
 
-        
-            const { subtotal, total } = await checkoutHelper.calculateTotalPrice(
-                cartItems,
-                userid, // need to check and do this on nect week
-
+        if (result) {
+            const wallet = await Wallet.findOneAndUpdate(
+                { user: userId },
+                {
+                    balance: walletAmount,
+                }
             );
-            res.json({ total, subtotal });
         }
-    // }
-    catch (error) {
+
+        res.json(result);
+    } catch (error) {
         throw new Error(error);
     }
 });
 
+const updateCheckoutPage = asyncHandler(async (req, res) => {
+    try {
+        const userid = req.user._id;
+        const coupon = (await Coupon.findOne({ code: req.body.code, expiryDate: { $gt: Date.now() } })) || null;
+        console.log(0);
+        const user = await User.findById(userid).populate("addresses");
+
+        const cartItems = await checkoutHelper.getCartItems(userid);
+console.log(1);
+        if (coupon) {
+            const { subtotal, total, usedFromWallet, walletBalance, discount } = await checkoutHelper.calculateTotalPrice(
+                cartItems,
+                userid,
+                req.body.payWithWallet,
+                coupon
+            );
+            res.json({ total, subtotal, usedFromWallet, walletBalance, discount });
+        } else {
+            const { subtotal, total, usedFromWallet, walletBalance, discount } = await checkoutHelper.calculateTotalPrice(
+                cartItems,
+                userid,
+                req.body.payWithWallet,
+                coupon
+            );
+            res.json({ total, subtotal, usedFromWallet, walletBalance, discount });
+        }
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
+/**
+ * Coupon Management
+ * Method POST
+ */
+const updateCoupon = asyncHandler(async (req, res) => {
+    try {
+        const userid = req.user._id;
+        const coupon = await Coupon.findOne({
+            code: req.body.code,
+            expiryDate: { $gt: Date.now() },
+        });
+
+        const cartItems = await checkoutHelper.getCartItems(userid);
+        const availableCoupons = await Coupon.find({
+            expiryDate: { $gt: Date.now() },
+            usedBy: { $nin: [userid] },
+        })
+            .select({ code: 1, _id: 0 })
+            .limit(4);
+        const { subtotal, total, discount } = await checkoutHelper.calculateTotalPrice(cartItems, userid, false, coupon);
+
+        if (!coupon) {
+            if (req.body.data === "onLoad" || req.body.data === "onUpdate") {
+                const coupons = availableCoupons.map((coupon) => coupon.code).join(" | ");
+                res.status(202).json({
+                    status: "info",
+                    message: "Try " + coupons,
+                    subtotal,
+                    total,
+                    discount,
+                });
+            } else {
+                res.status(202).json({
+                    status: "danger",
+                    message: "The coupon is invalid or expired.",
+                    subtotal,
+                    total,
+                    discount,
+                });
+            }
+        } else {
+            if (coupon.usedBy.includes(userid)) {
+                res.status(202).json({
+                    status: "danger",
+                    message: "The coupon is alrady used",
+                });
+            } else if (subtotal < coupon.minAmount) {
+                res.status(200).json({
+                    status: "danger",
+                    message: `You need to spend at least ${coupon.minAmount} to get this offer.`,
+                });
+            } else {
+                req.session.coupon = coupon;
+                res.status(200).json({
+                    status: "success",
+                    message: `${coupon.code} applied`,
+                    coupon: coupon,
+                    subtotal,
+                    total,
+                    discount,
+                });
+            }
+        }
+    } catch (error) {
+        res.status(500).json({ status: "error", message: "Internal Server Error" });
+    }
+});
+
+/**
+ * Remove Coupon Applied Coupon
+ * Mehtod GET
+ */
+const removeAppliedCoupon = asyncHandler(async (req, res) => {
+    req.session.coupon = null;
+    res.status(200).json("Ok");
+});
+
+
+
+module.exports = {
+    removeAppliedCoupon,
+    checkoutpage,
+    updateCoupon ,
+ placeOrder,
+ getCartData,orderPlaced,
+ updateCheckoutPage,
+ verifyPayment
+}

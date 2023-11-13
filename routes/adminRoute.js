@@ -63,4 +63,13 @@ adminRoute.get("/orders/:id", adminController.editOrder);
 adminRoute.put("/orders/update/:id", adminController.updateOrderStatuss);
 adminRoute.post("/orders/search", adminController.searchOrder);
 
+// Coupon Management---
+
+adminRoute.get("/coupon", adminController.couponspage);
+adminRoute.get("/coupon/add", adminController.addCoupon);
+adminRoute.get("/coupon/edit/:id", adminController.editCouponPage);
+
+adminRoute.post("/coupon/add", adminController.createCoupon);
+adminRoute.post("/coupon/edit/:id", adminController.updateCoupon);
+
 module.exports=adminRoute;

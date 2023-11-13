@@ -2,12 +2,10 @@ const User = require('../models/usermodel');
 const Category = require('../models/categoryModel');
 const Product = require('../models/productModel');
 const Images = require('../models/imageModel'); // Import the 'Images' model
-
-
 const asyncHandler = require('express-async-handler')
-
 const { sendOtp } = require('../utility/nodeMailer')
-
+const Wallet = require("../models/walletModel");
+const WalletTransaction = require("../models/walletTransactionModel");
 // Import the generateOTP function from the utility module
 const { generateOTP } = require('../utility/nodeMailer'); // Adjust the path accordingly
 
@@ -56,7 +54,7 @@ const insertUser = async (req, res) => {
             };
 
             const OTP = generateOTP() /** otp generating **/
-            
+
             req.session.otpUser = { ...UserData, otp: OTP };
             console.log(req.session.otpUser.otp)
             // req.session.mail = req.body.email;  
@@ -92,7 +90,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
 
         // const otp = generateOTP();
         // req.session.otpUser = otp;
-        
+
         const enteredOTP = req.body.otp;
         const email = req.session.otpUser.email
         const storedOTP = req.session.otpUser.otp; // Getting the stored OTP from the session
@@ -105,12 +103,12 @@ const verifyOTP = asyncHandler(async (req, res) => {
             delete req.session.otpUser.otp;
             res.redirect('/login');
         } else {
-            
+
             messages = 'Verification failed, please check the OTP or resend it.';
             console.log('verification failed');
 
         }
-        res.render('./user/pages/verifyOTP', { messages,email})
+        res.render('./user/pages/verifyOTP', { messages, email })
 
 
     } catch (error) {
@@ -200,24 +198,45 @@ const userLogout = async (req, res) => {
 const userProfile = asyncHandler(async (req, res) => {
     try {
         const user = req.user;
-        res.render('./user/pages/profile', { user })
+        const wallet = await Wallet.findOne({ user: user._id });
+        res.render('./user/pages/profile', { user, wallet })
     } catch (error) {
         throw new Error(error);
     }
 });
 
-const changePassword = asyncHandler(async  (req, res)=>{
-    try {
-        res.render('./user/pages/changePassword')
+const setNewPassword = async (req, res) => {
+    console.log(0);
 
-    } catch(error){
+    try {
+        const newpw = req.body.newpassword
+        const confpw = req.body.confpassword
+       
+        const mobile = req.session.mobile
+        const email = req.session.email
+
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+        if (!passwordRegex.test(req.body.newpassword)) {
+            return res.render("changePassword", { message: "Password Should Contain atleast 8 characters,one number and a special character" });
+        }
+
+        if (newpw === confpw) {
+            console.log(1);
+            const spassword = await securePassword(newpw)
+            const newUser = await User.updateOne({ email: email }, { $set: { password: spassword } });
+
+            res.redirect('/login')
+        } else {
+            res.render('changePassword', { message: 'Password and Confirm Password is not matching' })
+        }
+    } catch (error) {
         throw new Error(error);
     }
-});
+}
 
 
 // loading shop page---
-const  loadShop = asyncHandler(async (req, res) => {
+const loadShop = asyncHandler(async (req, res) => {
     console.log('request from unauth user ');
     try {
         const user = req.user
@@ -236,15 +255,15 @@ const  loadShop = asyncHandler(async (req, res) => {
             { categoryName: { $in: listedCategoryIds }, isListed: true }).populate('images')
             .skip((page - 1) * limit)
             .limit(limit)
-        console.log("products",findProducts);
-        let cartProductIds ;
+        console.log("products", findProducts);
+        let cartProductIds;
         if (user) {
-           if(user.cart){
-            console.log('cartsdfaaaaa',user.cart);
+            if (user.cart) {
+                console.log('cartsdfaaaaa', user.cart);
                 cartProductIds = user.cart.map(cartItem => cartItem.product.toString());
-               console.log(cartProductIds,'idsdklfj');
-           }
-          
+                console.log(cartProductIds, 'idsdklfj');
+            }
+
         } else {
             cartProductIds = null;
 
@@ -255,9 +274,10 @@ const  loadShop = asyncHandler(async (req, res) => {
             .countDocuments();
 
 
-        res.render('./user/pages/shop', { products: findProducts, category: listedCategories, user, cartProductIds,currentPage: page,
+        res.render('./user/pages/shop', {
+            products: findProducts, category: listedCategories, user, cartProductIds, currentPage: page,
             totalPages: Math.ceil(count / limit) // Calculating total pages
-            
+
         });
         console.log(2);
     } catch (error) {
@@ -271,7 +291,7 @@ const loadProduct = async (req, res) => {
         const productId = req.params.id;
         const product = await Product.findById(productId).populate('images')
         console.log(product)
-        res.render('./user/pages/products',{getalldata:product});
+        res.render('./user/pages/products', { getalldata: product });
     } catch (error) {
         throw new Error(error)
     }
@@ -296,8 +316,48 @@ const loadContact = async (req, res) => {
         throw new Error(error)
     }
 }
+const walletTransactionspage = asyncHandler(async (req, res) => {
+    try {
+        const walletId = req.params.id;
+        const walletTransactions = await WalletTransaction.find({ wallet: walletId }).sort({ timestamp: -1 });
+        res.render("user/pages/walletTransaction", {
+            title: "Wallet Transactions",
+            page: "Wallet-Transactions",
+            walletTransactions,
+        });
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
+// // review
+// const addReview = asyncHandler(async (req, res) => {
+//     try {
+//         const productId = req.params.id;
+//         const userId = req.user._id;
+
+//         const existingReview = await Review.findOne({ user: userId, product: productId });
+
+//         if (existingReview) {
+//             existingReview.review = req.body.review;
+//             existingReview.rating = req.body.rating;
+//             await existingReview.save();
+//         } else {
+//             const newReview = await Review.create({
+//                 user: userId,
+//                 product: productId,
+//                 review: req.body.review,
+//                 rating: req.body.rating,
+//             });
+//         }
+//         res.redirect("back");
+//     } catch (error) {
+//         throw new Error(error);
+//     }
+// });
+
 //search
-const search =asyncHandler( async (req, res) => {
+const search = asyncHandler(async (req, res) => {
     console.log(req.body.search);
     try {
         const data = req.body.search;
@@ -307,42 +367,44 @@ const search =asyncHandler( async (req, res) => {
         const listedCategories = await Category.find({ isListed: true });
         // Get the IDs of the listed categories
         const listedCategoryIds = listedCategories.map(category => category._id);
-        
+
         const searching = await Product.find({ title: { $regex: data, $options: 'i' } }).populate('images')
-        .skip((page - 1) * limit)
-        .limit(limit);
+            .skip((page - 1) * limit)
+            .limit(limit);
         console.log(user);
         const count = await Product.find(
             { categoryName: { $in: listedCategoryIds }, isListed: true })
             .countDocuments();
-            let cartProductIds;
-            if (user) {
-                if (user.cart) {
-                    cartProductIds = user.cart.map(cartItem => cartItem.product.toString());
-                }
-    
-            } else {
-                cartProductIds = null;
-    
+        let cartProductIds;
+        if (user) {
+            if (user.cart) {
+                cartProductIds = user.cart.map(cartItem => cartItem.product.toString());
             }
-            
-        if (searching.length>0) {
-            res.render('./user/pages/shop', { user, cartProductIds, catList: searching ,products:searching, category: listedCategories,currentPage: page,
-            totalPages: Math.ceil(count / limit)
-           })
 
         } else {
-            res.render('./user/pages/shop', { user, cartProductIds, catList: searching ,products:searching, category: listedCategories,currentPage: page,
+            cartProductIds = null;
+
+        }
+
+        if (searching.length > 0) {
+            res.render('./user/pages/shop', {
+                user, cartProductIds, catList: searching, products: searching, category: listedCategories, currentPage: page,
                 totalPages: Math.ceil(count / limit)
-               })
+            })
+
+        } else {
+            res.render('./user/pages/shop', {
+                user, cartProductIds, catList: searching, products: searching, category: listedCategories, currentPage: page,
+                totalPages: Math.ceil(count / limit)
+            })
         }
 
     } catch (error) {
         console.log(error.message);
-    }
+    }
 })
 
-module.exports={
+module.exports = {
     loadLandingPage,
     loadRegister,
     loadLogin,
@@ -358,7 +420,10 @@ module.exports={
     sendOTPpage,
     loadProduct,
     search,
-    changePassword
+    setNewPassword,
+    walletTransactionspage,
+  
+
 
 
 

@@ -5,7 +5,6 @@ const asyncHandler = require('express-async-handler')
 const sharp = require('sharp')
 const path = require('path')
 
-
 // productManagement list the available products--
 const productManagement = asyncHandler(async (req, res) => {
     try {

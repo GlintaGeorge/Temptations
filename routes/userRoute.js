@@ -36,7 +36,8 @@ userRoute.get('/shop',userController.loadShop);// loading shop page
 userRoute.get('/about',userController.loadAbout);// loading about page
 userRoute.get('/contact',userController.loadContact);// loading contact page
 userRoute.post('/shop/search', userController.search);// searching....
-userRoute.get('/changePassword',userController.changePassword)// changePassword
+
+userRoute.post('/setNewPassword',userController.setNewPassword);// changePassword
 
 
 // Login & Verification section---
@@ -55,10 +56,11 @@ userRoute.get('/products/:id', userController.loadProduct);
 userRoute.get('/logout', ensureAuthenticated, userController.userLogout);
 
 userRoute.get('/profile', ensureAuthenticated, userController.userProfile);
+userRoute.get("/profile/wallet/:id", userController.walletTransactionspage);
 
 // cart_section-- 
 userRoute.get('/cart', ensureAuthenticated, cartController.cartpage);
-userRoute.get('/add/:id', ensureAuthenticated, cartController.addToCart);
+userRoute.get('/cart/add/:id', ensureAuthenticated, cartController.addToCart);
 userRoute.get('/remove/:id', ensureAuthenticated, cartController.removeFromCart);
 userRoute.get('/cart/inc/:id',ensureAuthenticated, cartController.incQuantity);
 userRoute.get('/cart/dec/:id', ensureAuthenticated, cartController.decQuantity);
@@ -78,6 +80,11 @@ userRoute.get("/checkout/get", checkoutController.getCartData);
 userRoute.post("/place-order", checkoutController.placeOrder);
 userRoute.get("/order-placed/:id", checkoutController.orderPlaced);
 userRoute.post("/update", checkoutController.updateCheckoutPage);
+userRoute.post("/verify-payment", checkoutController.verifyPayment);
+userRoute.post("/coupon", checkoutController.updateCoupon);
+userRoute.get("/coupon/remove", checkoutController.removeAppliedCoupon);
+userRoute.get("/profile/wallet/:id", userController.walletTransactionspage);
+
 
 
 // Order Routes

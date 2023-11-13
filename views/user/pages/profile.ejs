@@ -16,21 +16,22 @@
                             <div class="col-md-4">
                                 <div class="dashboard-menu">
                                     <ul class="nav flex-column" role="tablist">
-                                        <li class="nav-item">
+                                        <!-- <li class="nav-item">
                                             <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="false"><i class="fi-rs-settings-sliders mr-10"></i>Dashboard</a>
+                                        </li> -->
+                                        <li class="nav-item">
+                                            <a class="nav-link active" id="account-detail-tab" data-bs-toggle="tab" href="" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Account Details</a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link" id="orders-tab"  href="/orders"  aria-controls="orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="track-orders-tab"  href="/changePassword"  aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Change Password</a>
+                                            <a class="nav-link" id="track-orders-tab"  href="/setNewPassword"  aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Change Password</a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link" id="address-tab" href="/savedAddress"  aria-controls="address" aria-selected="true"><i class="fi-rs-marker mr-10"></i>My Address</a>
                                         </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Account Details</a>
-                                        </li>
+                                        
                                         <li class="nav-item">
                                             <a class="nav-link" href="/"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
                                         </li>
@@ -43,9 +44,22 @@
                                         <div class="card">
                                             <div class="card-header">
                                                 <h5 class="mb-0">Hello <%= user.userName %> </h5>
+                                                
+                                                    <!-- <h3 class="mb-0">Email:</h3> -->
+                                                    <p class="mb-0">Email:<%= user.email %></p>
+                                      
                                             </div>
                                             <div class="card-body">
-                                                <p>From your account dashboard. you can easily check &amp; view your <a href="#">recent orders</a>, manage your <a href="#">shipping and billing addresses</a> and <a href="#">edit your password and account details.</a></p>
+                                               
+                                                <a href="/wallet/<%= wallet?._id %>" class="text-decoration-none text-center p-4 d-block">
+                                                    <i class="pe-7s-wallet fa-3x text-danger mb-3"></i>
+                                                    <h6 class="h4 fw-bold"> Wallet Balance</h6>
+                                                    <p class="text-muted">
+                                                        ₹ <%= wallet?.balance ? wallet.balance.toFixed(2) : "0" %>
+                                                    </p>
+                                                </a>
+                                               
+                                                <!-- <p>From your account dashboard. you can easily check &amp; view your <a href="#">recent orders</a>, manage your <a href="#">shipping and billing addresses</a> and <a href="#">edit your password and account details.</a></p> -->
                                             </div>
                                         </div>
                                     </div>

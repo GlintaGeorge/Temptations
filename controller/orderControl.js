@@ -2,11 +2,16 @@ const asyncHandler = require("express-async-handler");
 const {
     getOrders,
     getSingleOrder,
+    // getReview,
     cancelOrderById,
     cancelSingleOrder,
     returnOrder,
+    // generateInvoice,
 } = require("../helpers/orderHelper");
-const orderItem=require("../models/orderItemModel")
+const OrderItem = require("../models/orderItemModel");
+
+// const pdfMake = require("pdfmake/build/pdfmake");
+// const vfsFonts = require("pdfmake/build/vfs_fonts");
 
 /**
  * Orders Page Route
@@ -14,8 +19,9 @@ const orderItem=require("../models/orderItemModel")
  */
 exports.orderspage = asyncHandler(async (req, res) => {
     try {
-        console.log('uhjik',req.user);
         const userId = req.user._id;
+        console.log(userId);
+
         const orders = await getOrders(userId);
 
         res.render("user/pages/orders", {
@@ -38,8 +44,7 @@ exports.singleOrder = asyncHandler(async (req, res) => {
 
         const { order, orders } = await getSingleOrder(orderId);
         // const review = await getReview(req.user._id, order.product._id);
-
-        res.render("user/pages/singleOrder.ejs", {
+        res.render("user/pages/singleOrder", {
             title: order.product.title,
             page: order.product.title,
             order,
@@ -77,15 +82,12 @@ exports.cancelOrder = asyncHandler(async (req, res) => {
  */
 exports.cancelSingleOrder = asyncHandler(async (req, res) => {
     try {
-        
         const orderItemId = req.params.id;
-        console.log('sdfghj');
 
         const result = await cancelSingleOrder(orderItemId, req.user._id);
         return res.redirect("/orders");
         if (result === "redirectBack") {
-            console.log('swedrftgyhujik');
-       
+           
         } else {
             res.json(result);
         }
@@ -113,4 +115,28 @@ exports.returnOrder = asyncHandler(async (req, res) => {
     }
 });
 
+/**
+ * Download Invoice
+ * Method GET
+ */
+exports.donwloadInvoice = asyncHandler(async (req, res) => {
+    try {
+        const orderId = req.params.id;
 
+        const data = await generateInvoice(orderId);
+        pdfMake.vfs = vfsFonts.pdfMake.vfs;
+
+        // Create a PDF document
+        const pdfDoc = pdfMake.createPdf(data);
+
+        // Generate the PDF and send it as a response
+        pdfDoc.getBuffer((buffer) => {
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader("Content-Disposition", `attachment; filename=invoices.pdf`);
+
+            res.end(buffer);
+        });
+    } catch (error) {
+        throw new Error(error);
+    }
+});

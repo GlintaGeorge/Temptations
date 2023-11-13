@@ -91,7 +91,9 @@
 
                                         <div class="product-extra-link2">
                                             <!-- <button type="submit" class="button button-add-to-cart" >Add to cart </button> -->
-                                            <a href="/add/<%= getalldata._id %>" class="button button-add-to-cart" style="display: inline-block; padding: 10px 90px; margin-left: 10px">
+                                            <a class="button button-add-to-cart" style="display: inline-block; padding: 10px 90px; margin-left: 10px" 
+                                            title="Add To cart"
+                                                onclick = "addToCart(`<%= getalldata._id %>`)">
                                                 <h5 class="ml-0">Addtocart</h5>
                                             </a>
                                             
@@ -144,3 +146,5 @@
         </div>
     </section>
 </main>
+
+<script src="/assets/js/shop/cart.js"></script>

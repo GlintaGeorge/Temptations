@@ -1,7 +1,8 @@
+
 const Product = require("../models/productModel");
 const Cart = require("../models/cartModel");
 
-function calculateCartTotals(products) {
+function calculateCartTotals(products, coupon) {
     let subtotal = 0;
     for (const product of products) {
         const productTotal = parseFloat(product.product.salePrice) * product.quantity;
@@ -11,9 +12,22 @@ function calculateCartTotals(products) {
     let total = subtotal;
     let discount = 0;
 
-    
+    if (coupon) {
+        if (coupon.type === "percentage") {
+            discount = ((total * coupon.value) / 100).toFixed(2);
+            if (discount > coupon.maxAmount) {
+                discount = coupon.maxAmount;
+                total -= discount;
+            } else {
+                total -= discount;
+            }
+        } else if (coupon.type === "fixedAmount") {
+            discount = coupon.value;
+            total -= discount;
+        }
+    }
 
-    return { subtotal, total };
+    return { subtotal, total, discount };
 }
 
 const findCartItem = async (userId, productId) => {
@@ -106,5 +120,8 @@ const decrementQuantity = async (userId, productId, res) => {
         });
     }
 };
+
+
+
 
 module.exports = { decrementQuantity, findCartItem, findProductById, incrementQuantity, calculateCartTotals };

@@ -1,9 +1,10 @@
+
 const Product = require("../models/productModel");
 const OrderItem = require("../models/orderItemModel");
 const Order = require("../models/orderModel");
 const Wallet = require("../models/walletModel");
 const WalletTransactoins = require("../models/walletTransactionModel");
-// const Coupon = require("../models/couponModel");
+const Coupon = require("../models/couponModel");
 const status = require("../utility/status");
 
 async function handleOrderPayment(order, orders, wallet) {
