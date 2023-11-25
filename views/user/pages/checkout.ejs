@@ -101,10 +101,10 @@
                                                                         <%= item.title %>
                                                                     </h5>
                                                                     <p class="card-text">
-                                                                        <%= item.street %>, <%= item.city %>, <%=
+                                                                         <%= item.address %>, <%= item.town %>,<%=
                                                                                     item.state %>, <%= item.pincode %>
                                                                     </p>
-                                                                    <p class="card-text">Mobile: +91 <%= item.mobile %>
+                                                                    <p class="card-text">Mobile: +91 <%= item.phone %>
                                                                     </p>
                                                                 </label>
                                                             </div>
@@ -250,395 +250,205 @@
             </form>
         </div>
     </section>
-</main>
 
 <!-- Checkout Area End -->
-
-
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script>
-        let selectedAddressId = null;
-        const wallet = document.getElementById("wallet");
-        const couponBtn = document.getElementById("couponBtn");
-        const rmCoupon = document.getElementById("rmCoupon");
+<script>
+    let selectedAddressId = null;
+    const wallet = document.getElementById("wallet");
+    const couponBtn = document.getElementById("couponBtn");
+    const rmCoupon = document.getElementById("rmCoupon");
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const form = document.querySelector("form");
-            const rzpBtn = document.getElementById("rzp-button");
-            const codBtn = document.getElementById("cod-button");
-            const wltBtn = document.getElementById("wlt-button");
-            const addressRadios = document.querySelectorAll('input[name="addressId"]');
-            const isCoupon = document.getElementById("coupon_code");
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const rzpBtn = document.getElementById("rzp-button");
+        const codBtn = document.getElementById("cod-button");
+        const wltBtn = document.getElementById("wlt-button");
+        const addressRadios = document.querySelectorAll('input[name="addressId"]');
+        const isCoupon = document.getElementById("coupon_code");
 
-            const firstRadio = document.querySelector('input[name="addressId"]:checked');
-            if (firstRadio) {
-                selectedAddressId = firstRadio.value;
-            }
+        const firstRadio = document.querySelector('input[name="addressId"]:checked');
+        if (firstRadio) {
+            selectedAddressId = firstRadio.value;
+        }
 
-            addressRadios.forEach((radio) => {
-                radio.addEventListener("change", (event) => {
-                    selectedAddressId = event.target.value;
-                });
+        addressRadios.forEach((radio) => {
+            radio.addEventListener("change", (event) => {
+                selectedAddressId = event.target.value;
             });
-
-            codBtn.addEventListener("click", handleCodButtonClick);
-            rzpBtn.addEventListener("click", handleRzpButtonClick);
-            wltBtn.addEventListener("click", handleWltButtonClick);
-            couponBtn.addEventListener("click", handleCouponBtnClick);
-            rmCoupon.addEventListener("click", handleRemoveCouponBtnClick);
-
-            handleWalletPayment();
-
-            if (isCoupon.value) {
-                codBtn.classList.add("disabled");
-                handleCouponChange();
-            }
-
-            const couponElement = document.querySelector("#coupon_code");
-            handleCouponBtnClick("onLoad");
         });
 
-        async function handleWltButtonClick(event) {
-            event.preventDefault();
-            if ((await checkCartData()) && (await checkCoupon())) {
-                const data = {
-                    addressId: selectedAddressId,
-                    payment_method: "wallet_payment",
-                    isWallet: wallet.checked,
-                };
-                await placeOrder("/place-order", data);
-            }
+        codBtn.addEventListener("click", handleCodButtonClick);
+        rzpBtn.addEventListener("click", handleRzpButtonClick);
+        wltBtn.addEventListener("click", handleWltButtonClick);
+        couponBtn.addEventListener("click", handleCouponBtnClick);
+        rmCoupon.addEventListener("click", handleRemoveCouponBtnClick);
+
+        handleWalletPayment();
+
+        if (isCoupon.value) {
+            codBtn.classList.add("disabled");
+            handleCouponChange();
         }
 
-        async function handleCodButtonClick(event) {
-            event.preventDefault();
-            if (await checkCartData()) {
-                const data = {
-                    addressId: selectedAddressId,
-                    payment_method: "cash_on_delivery",
-                    isWallet: wallet.checked,
-                };
-                await placeOrder("/place-order", data);
-            }
-        }
+        const couponElement = document.querySelector("#coupon_code");
+        handleCouponBtnClick("onLoad");
+    });
 
-        async function handleRzpButtonClick() {
-            if ((await checkCartData()) && (await checkCoupon())) {
-                const data = {
-                    addressId: selectedAddressId,
-                    payment_method: "online_payment",
-                    isWallet: wallet.checked,
-                };
-                await placeOrder("/place-order", data);
-            }
-        }
-
-        async function placeOrder(url, data) {
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(data),
-                });
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                const responseData = await response.json();
-                if (data.payment_method === "cash_on_delivery") {
-                    handleCodPayment(responseData);
-                } else if (data.payment_method === "online_payment") {
-                    handleRzpPayment(responseData);
-                } else if (data.payment_method === "wallet_payment") {
-                    handleWltPayment(responseData);
-                }
-            } catch (error) {
-                handleError(error);
-            }
-        }
-
-        async function checkCartData() {
-            try {
-                const originalCartData = JSON.parse(document.getElementById("originalCartData").value);
-                const response = await fetch("/checkout/get");
-
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-
-                const currentCartData = await response.json();
-
-                if (currentCartData !== null && compareJSONStrings(originalCartData, currentCartData)) {
-                    showCartConfirmation();
-                    return false;
-                }
-
-                return true;
-            } catch (error) {
-                handleError(error);
-            }
-        }
-
-        async function checkCoupon() {
-            const code = document.getElementById("coupon_code");
-            if (code.value) {
-                try {
-                    const response = await fetch("/coupon/", {
-                        method: "POST",
-                        body: JSON.stringify({ code: code.value }),
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.status === "success") {
-                            return true;
-                        } else if (data.status === "danger") {
-                            showCouponAlert(data);
-                        }
-                    }
-                } catch (error) {
-                    console.error("Fetch error:", error);
-                    handleError(error);
-                }
-            } else {
-                return true;
-            }
-        }
-
-        function compareJSONStrings(jsonString1, jsonString2) {
-            return JSON.stringify(jsonString1) !== JSON.stringify(jsonString2);
-        }
-
-        function showCartConfirmation() {
-            Swal.fire({
-                title: "Cart Confirmation",
-                text: "Your cart has changed. Do you want to reload the page?",
-                icon: "info",
-                showCancelButton: true,
-                confirmButtonText: "Reload",
-                cancelButtonText: "Close",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    proceedToCheckout();
-                }
-            });
-        }
-
-        function showCouponAlert(data) {
-            Swal.fire({
-                title: "Coupon Alert",
-                text: data.message,
-                icon: "info",
-                showCancelButton: true,
-                confirmButtonText: "Remove Coupon",
-                cancelButtonText: "Close",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    handleRemoveCouponBtnClick();
-                }
-            });
-        }
-
-        async function handleCouponChange() {
-            const code = document.getElementById("code");
-            const coupon = document.getElementById("coupnSection");
-            const total = document.getElementById("total");
-
-            try {
-                fetch("/coupon/", {
-                    method: "POST",
-                    body: JSON.stringify({ code: code.textContent }),
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                })
-                    .then((response) => {
-                        if (response.ok) {
-                            return response.json();
-                        }
-                    })
-                    .then((data) => {
-                        if (data.status === "danger") {
-                            coupon.classList.add("text-danger");
-                            coupon.style.textDecoration = "line-through";
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Fetch error:", error);
-                    });
-            } catch (error) {}
-        }
-
-        function proceedToCheckout() {
-            window.location.reload();
-        }
-
-        function handleCodPayment(responseData) {
-            window.location.href = `/order-placed/${responseData.orderId}`;
-        }
-
-        function handleWltPayment(responseData) {
-            window.location.href = `/order-placed/${responseData.orderId}`;
-        }
-
-        function handleRzpPayment(responseData) {
-            const options = {
-                key: "rzp_test_FfrkTgdbpUU49d",
-                amount: responseData.order.totalPrice * 100,
-                currency: "INR",
-                name: "Temptations",
-                description: "Test Transaction",
-                image: "/assets/imgs/theme/temp2.png",
-                order_id: responseData.order.id,
-                handler: function (response) {
-                    handleSuccessPayment(response, responseData);
-                },
-                prefill: {
-                    name: responseData.user.userName,
-                    email: responseData.user.email,
-                    contact: responseData.user.mobile,
-                },
-                notes: {
-                    address: "Razorpay Corporate Office",
-                },
-                theme: {
-                    color: "#000000",
-                },
-                modal: {
-                    ondismiss: function () {
-                        handlePaymentFailure(responseData.orderId);
-                    },
-                },
+    async function handleWltButtonClick(event) {
+        event.preventDefault();
+        if ((await checkCartData()) && (await checkCoupon())) {
+            const data = {
+                addressId: selectedAddressId,
+                payment_method: "wallet_payment",
+                isWallet: wallet.checked,
             };
-
-            const rzp1 = new Razorpay(options);
-
-            rzp1.on("payment.failed", function (response) {
-                handlePaymentFailure(responseData.orderId);
-            });
-
-            rzp1.open();
+            await placeOrder("/place-order", data);
         }
+    }
 
-        function handleSuccessPayment(response, responseData) {
-            const postData = {
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-                orderId: responseData.orderId,
-                userId: responseData.user._id,
-                walletAmount: response.walletamount,
+    async function handleCodButtonClick(event) {
+        event.preventDefault();
+        if (await checkCartData()) {
+            const data = {
+                addressId: selectedAddressId,
+                payment_method: "cash_on_delivery",
+                isWallet: wallet.checked,
             };
+            await placeOrder("/place-order", data);
+        }
+    }
 
-            fetch(`/verify-payment`, {
+    async function handleRzpButtonClick() {
+        if ((await checkCartData()) && (await checkCoupon())) {
+            const data = {
+                addressId: selectedAddressId,
+                payment_method: "online_payment",
+                isWallet: wallet.checked,
+            };
+            await placeOrder("/place-order", data);
+        }
+    }
+
+    async function placeOrder(url, data) {
+        try {
+            const response = await fetch(url, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(postData),
-            })
-                .then((response) => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error("Error fetching data");
-                    }
-                })
-                .then((data) => {
-                    window.location.href = `/order-placed/${data.orderId}`;
-                })
-                .catch((error) => {
-                    handleError(error);
-                });
+                body: JSON.stringify(data),
+            });
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            const responseData = await response.json();
+            if (data.payment_method === "cash_on_delivery") {
+                handleCodPayment(responseData);
+            } else if (data.payment_method === "online_payment") {
+                handleRzpPayment(responseData);
+            } else if (data.payment_method === "wallet_payment") {
+                handleWltPayment(responseData);
+            }
+        } catch (error) {
+            handleError(error);
         }
+    }
 
-        async function handlePaymentFailure(orderId) {
+    async function checkCartData() {
+        try {
+            const originalCartData = JSON.parse(document.getElementById("originalCartData").value);
+            const response = await fetch("/checkout/get");
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const currentCartData = await response.json();
+
+            if (currentCartData !== null && compareJSONStrings(originalCartData, currentCartData)) {
+                showCartConfirmation();
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            handleError(error);
+        }
+    }
+
+    async function checkCoupon() {
+        const code = document.getElementById("coupon_code");
+        if (code.value) {
             try {
-                const cancelOrderUrl = `/orders/${orderId}`;
-                const requestOptions = {
-                    method: "PUT",
-                };
-                const response = await fetch(cancelOrderUrl, requestOptions);
+                const response = await fetch("/coupon/", {
+                    method: "POST",
+                    body: JSON.stringify({ code: code.value }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
 
                 if (response.ok) {
-                    console.log("Order cancellation request succeeded.");
-                    return response.json();
-                } else {
-                    console.error("Order cancellation request failed.");
+                    const data = await response.json();
+                    if (data.status === "success") {
+                        return true;
+                    } else if (data.status === "danger") {
+                        showCouponAlert(data);
+                    }
                 }
             } catch (error) {
+                console.error("Fetch error:", error);
                 handleError(error);
             }
+        } else {
+            return true;
         }
+    }
 
-        function handleError(error) {
-            console.error("Error:", error);
-        }
+    function compareJSONStrings(jsonString1, jsonString2) {
+        return JSON.stringify(jsonString1) !== JSON.stringify(jsonString2);
+    }
 
-        function handleWalletPayment() {
-            wallet.removeEventListener("change", handlePaymentChange);
-            wallet.addEventListener("change", handlePaymentChange);
-            handleCouponBtnClick("onUpdate");
-        }
-
-        function handlePaymentChange() {
-            const totalAmount = document.getElementById("total");
-            const walletAmount = document.getElementById("wallet-amount");
-            const availableBalance = document.getElementById("available-balance");
-            const codBtn = document.getElementById("cod-button");
-            const wltBtn = document.getElementById("wlt-button");
-            const rzpBtn = document.getElementById("rzp-button");
-            const payWithWallet = this.checked ? true : false;
-            const code = document.getElementById("coupon_code");
-
-            if (payWithWallet) {
-                codBtn.classList.add("disabled");
-            } else {
-                codBtn.classList.remove("disabled");
+    function showCartConfirmation() {
+        Swal.fire({
+            title: "Cart Confirmation",
+            text: "Your cart has changed. Do you want to reload the page?",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Reload",
+            cancelButtonText: "Close",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                proceedToCheckout();
             }
+        });
+    }
 
-            fetch("/update", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ payWithWallet, code: code.value }),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    totalAmount.innerText = data.total.toFixed(2);
-                    walletAmount.innerText = data.usedFromWallet.toFixed(2);
-                    availableBalance.innerText = data.walletBalance.toFixed(2);
-                    if (data.total === 0) {
-                        wltBtn.style.display = "grid";
-                        rzpBtn.style.display = "none";
-                    } else {
-                        wltBtn.style.display = "none";
-                        rzpBtn.style.display = "grid";
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error updating checkout page:", error);
-                });
-        }
+    function showCouponAlert(data) {
+        Swal.fire({
+            title: "Coupon Alert",
+            text: data.message,
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Remove Coupon",
+            cancelButtonText: "Close",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                handleRemoveCouponBtnClick();
+            }
+        });
+    }
 
-        function handleCouponBtnClick(data) {
-            const couponCode = document.getElementById("coupon_code");
-            const sanitizedValue = couponCode.value.replace(/[^A-Z0-9]/g, "").toUpperCase();
-            const couponError = document.getElementById("couponError");
-            const total = document.getElementById("total");
-            const discount = document.getElementById("discount");
-            const rzpBtn = document.getElementById("rzp-button");
-            const codBtn = document.getElementById("cod-button");
-            const wltBtn = document.getElementById("wlt-button");
+    async function handleCouponChange() {
+        const code = document.getElementById("code");
+        const coupon = document.getElementById("coupnSection");
+        const total = document.getElementById("total");
 
+        try {
             fetch("/coupon/", {
                 method: "POST",
-                body: JSON.stringify({ code: sanitizedValue, data }),
+                body: JSON.stringify({ code: code.textContent }),
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -650,41 +460,240 @@
                 })
                 .then((data) => {
                     if (data.status === "danger") {
-                        couponError.classList.remove("text-success");
-                        couponError.classList.add("text-danger");
-                        couponError.textContent = data.message;
-                        discount.textContent = 0;
-                        rzpBtn.classList.add("disabled");
-                        rzpBtn.style.textDecoration = "line-through";
-                        codBtn.classList.add("disabled");
-                        codBtn.style.textDecoration = "line-through";
-                        wltBtn.classList.add("disabled");
-                        wltBtn.style.textDecoration = "line-through";
-
-                        // couponList.classList.remove("d-block");
-                        // couponList.classList.add("d-none");
-                        // checkoutBtn.disabled = true;
-                        // checkoutBtn.style.textDecoration = "line-through";
-                    } else if (data.status === "success") {
-                        couponError.textContent = data.message + " " + data.coupon.description;
-                        couponError.classList.remove("text-danger");
-                        couponError.classList.add("text-success");
-                        total.textContent = data.total;
-                        discount.textContent = data.discount;
+                        coupon.classList.add("text-danger");
+                        coupon.style.textDecoration = "line-through";
                     }
                 })
                 .catch((error) => {
                     console.error("Fetch error:", error);
                 });
+        } catch (error) {}
+    }
+
+    function proceedToCheckout() {
+        window.location.reload();
+    }
+
+    function handleCodPayment(responseData) {
+        window.location.href = `/order-placed/${responseData.orderId}`;
+    }
+
+    function handleWltPayment(responseData) {
+        window.location.href = `/order-placed/${responseData.orderId}`;
+    }
+
+    function handleRzpPayment(responseData) {
+            const options = {
+                key: "rzp_test_FfrkTgdbpUU49d",
+                amount: responseData.order.totalPrice * 100,
+                currency: "INR",
+                name: "Temptations",
+                description: "Test Transaction",
+                image: "/assets/imgs/theme/temp2.png",
+                order_id: responseData.order.id,
+                handler: function (response) {
+                    handleSuccessPayment(response, responseData);
+                },
+            prefill: {
+                name: responseData.user.userName,
+                email: responseData.user.email,
+                contact: responseData.user.mobile,
+            },
+            notes: {
+                address: "Razorpay Corporate Office",
+            },
+            theme: {
+                color: "#000000",
+            },
+            modal: {
+                ondismiss: function () {
+                    handlePaymentFailure(responseData.orderId);
+                },
+            },
+        };
+
+        const rzp1 = new Razorpay(options);
+
+        rzp1.on("payment.failed", function (response) {
+            handlePaymentFailure(responseData.orderId);
+        });
+
+        rzp1.open();
+    }
+
+    function handleSuccessPayment(response, responseData) {
+        const postData = {
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature,
+            orderId: responseData.orderId,
+            userId: responseData.user._id,
+            walletAmount: response.walletamount,
+        };
+       
+            
+  
+
+        fetch(`/verify-payment`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(postData),
+        })
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Error fetching data");
+                }
+            })
+            .then((data) => {
+                window.location.href = `/order-placed/${data.orderId}`;
+            })
+            .catch((error) => {
+                handleError(error);
+            });
+    }
+
+    async function handlePaymentFailure(orderId) {
+        try {
+            const cancelOrderUrl = `/orders/${orderId}`;
+            const requestOptions = {
+                method: "PUT",
+            };
+            const response = await fetch(cancelOrderUrl, requestOptions);
+
+            if (response.ok) {
+                console.log("Order cancellation request succeeded.");
+                return response.json();
+            } else {
+                console.error("Order cancellation request failed.");
+            }
+        } catch (error) {
+            handleError(error);
+        }
+    }
+
+    function handleError(error) {
+        console.error("Error:", error);
+    }
+
+    function handleWalletPayment() {
+        wallet.removeEventListener("change", handlePaymentChange);
+        wallet.addEventListener("change", handlePaymentChange);
+        handleCouponBtnClick("onUpdate");
+    }
+
+    function handlePaymentChange() {
+        const totalAmount = document.getElementById("total");
+        const walletAmount = document.getElementById("wallet-amount");
+        const availableBalance = document.getElementById("available-balance");
+        const codBtn = document.getElementById("cod-button");
+        const wltBtn = document.getElementById("wlt-button");
+        const rzpBtn = document.getElementById("rzp-button");
+        const payWithWallet = this.checked ? true : false;
+        const code = document.getElementById("coupon_code");
+
+        if (payWithWallet) {
+            codBtn.classList.add("disabled");
+        } else {
+            codBtn.classList.remove("disabled");
         }
 
-        function handleRemoveCouponBtnClick() {
-            fetch("/coupon/remove", {
-                method: "GET",
-            }).then((response) => {
-                if (response.ok) {
-                    window.location.reload();
+        fetch("/update", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ payWithWallet, code: code.value }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                totalAmount.innerText = data.total.toFixed(2);
+                walletAmount.innerText = data.usedFromWallet.toFixed(2);
+                availableBalance.innerText = data.walletBalance.toFixed(2);
+                if (data.total === 0) {
+                    wltBtn.style.display = "grid";
+                    rzpBtn.style.display = "none";
+                } else {
+                    wltBtn.style.display = "none";
+                    rzpBtn.style.display = "grid";
                 }
+            })
+            .catch((error) => {
+                console.error("Error updating checkout page:", error);
             });
-        }
-    </script>
+    }
+
+    function handleCouponBtnClick(data) {
+        const couponCode = document.getElementById("coupon_code");
+        const sanitizedValue = couponCode.value.replace(/[^A-Z0-9]/g, "").toUpperCase();
+        const couponError = document.getElementById("couponError");
+        const total = document.getElementById("total");
+        const discount = document.getElementById("discount");
+        const rzpBtn = document.getElementById("rzp-button");
+        const codBtn = document.getElementById("cod-button");
+        const wltBtn = document.getElementById("wlt-button");
+
+        fetch("/coupon/", {
+            method: "POST",
+            body: JSON.stringify({ code: sanitizedValue, data }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                }
+            })
+            .then((data) => {
+                if (data.status === "danger") {
+                    couponError.classList.remove("text-success");
+                    couponError.classList.add("text-danger");
+                    couponError.textContent = data.message;
+                    discount.textContent = 0;
+                    rzpBtn.classList.add("disabled");
+                    rzpBtn.style.textDecoration = "line-through";
+                    codBtn.classList.add("disabled");
+                    codBtn.style.textDecoration = "line-through";
+                    wltBtn.classList.add("disabled");
+                    wltBtn.style.textDecoration = "line-through";
+
+                    // couponList.classList.remove("d-block");
+                    // couponList.classList.add("d-none");
+                    // checkoutBtn.disabled = true;
+                    // checkoutBtn.style.textDecoration = "line-through";
+                } else if (data.status === "success") {
+                    couponError.textContent = data.message + " " + data.coupon.description;
+                    couponError.classList.remove("text-danger");
+                    couponError.classList.add("text-success");
+                    total.textContent = data.total;
+                    discount.textContent = data.discount;
+                }
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error);
+            });
+    }
+
+    function handleRemoveCouponBtnClick() {
+        fetch("/coupon/remove", {
+            method: "GET",
+        }).then((response) => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+    }
+</script>
+
+
+
+
+</main>
+
+
+
+

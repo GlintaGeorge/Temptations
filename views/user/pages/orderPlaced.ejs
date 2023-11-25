@@ -12,7 +12,10 @@
                         <p><strong>Shipping Address:</strong> <%= order.street %>, <%= order.city %>, <%= order.state %></p>
                         <p><strong>Phone:</strong> <%= order.phone %></p>
                         <p><strong>Total Price:</strong> <%= order.totalPrice %></p>
-                        <p><strong>Ordered Date:</strong> <%= new Date(order.orderedDate).toUTCString() %></p>
+                        <!-- Format ordered date using Moment.js -->
+                        <!-- Your EJS template code -->
+                        <p><strong>Ordered Date:</strong> <%= moment(order.orderedDate).local().format('MMMM Do YYYY, h:mm a') %></p>
+
 
                         <h4 class="mt-4">Order Items</h4>
                         <% order.orderItems.forEach(product => { %>

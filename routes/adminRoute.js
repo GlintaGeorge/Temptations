@@ -68,8 +68,19 @@ adminRoute.post("/orders/search", adminController.searchOrder);
 adminRoute.get("/coupon", adminController.couponspage);
 adminRoute.get("/coupon/add", adminController.addCoupon);
 adminRoute.get("/coupon/edit/:id", adminController.editCouponPage);
-
 adminRoute.post("/coupon/add", adminController.createCoupon);
 adminRoute.post("/coupon/edit/:id", adminController.updateCoupon);
+
+adminRoute.get("/sales-report", adminController.salesReportpage);
+adminRoute.get("/sales-data-weekly", adminController.getSalesData);
+adminRoute.get("/get/sales-report", adminController.generateSalesReport);
+
+adminRoute.use((req, res) => {
+    res.render("admin/page404", { title: "404", page: "404" });
+});
+
+
+
+adminRoute.get('*', (req, res) => { res.render('./admin/page404', { title: 'Error' }) })
 
 module.exports=adminRoute;

@@ -17,46 +17,54 @@
                             <div class="col-md-6 col-sm-12 col-xs-12">
                                 <div class="detail-gallery">
                                     <span class="zoom-icon"><i class="fi-rs-search"></i></span>
-                                    <!-- MAIN SLIDES -->
-                                    <div class="product-image-slider">
-
-                                        <% getalldata.images.forEach(img=>{ %>
-                                            <figure class="border-radius-10">
-                                                <img src="<%= img.imageUrl %>" alt="product image">
-                                            </figure>
-                                            <% }) %>
+                                    <!-- Main Image -->
+                                    <div class="main-image">
+                                        <img src="<%= getalldata.images[0].imageUrl %>" alt="Main product image" id="mainProductImage">
                                     </div>
-                                    <!-- THUMBNAILS -->
-                                    <div class="slider-nav-thumbnails pl-15 pr-15">
-                                        <% getalldata.images.forEach(img=>{ %>
-                                            <div><img src="<%= img.thumbnailUrl %> alt=" product image"></div>
-                                            <% }) %>
-
-
+                                    <!-- Image Slider -->
+                                    <div class="product-image-slider" id="thumbnailSlider">
+                                        <% getalldata.images.slice(1).forEach((img, index) => { %>
+                                            <figure class="border-radius-10" onclick="updateMainImage('<%= img.imageUrl %>')">
+                                                <img src="<%= img.imageUrl %>" alt="Thumbnail product image" class="thumbnail-image">
+                                            </figure>
+                                        <% }); %>
                                     </div>
                                 </div>
                                 <!-- End Gallery -->
                             </div>
+                            
+                            
                             <div class="col-md-6 col-sm-12 col-xs-12">
                                 <div class="detail-info">
                                     <h2 class="title-detail">
                                         <%= getalldata.title %>
                                     </h2>
-                                    <div class="product-detail-rating">
 
-                                        <!-- <div class="product-rate-cover text-end">
-                                            <div class="product-rate d-inline-block">
-                                                <div class="product-rating" style="width:90%">
-                                                </div>
+                                    <div class="rating-number">
+                                        <div class="quick-view-rating d-flex justify-content-between">
+                                            <span class="text-secondary"> <%= reviews.length %> Ratings</span>
+                                            <div class="ml-auto"> <!-- Use ml-auto class to push the star to the right -->
+                                                <img src="/admin/assets/imgs/icons/star.svg" style="height: 40px; width: 40px" alt="star" />
+                                                <span><%= `(${avgRating})` %></span>
                                             </div>
-                                           
-                                        </div> -->
+                                        </div>
                                     </div>
+                                    
+                                    
+                                    <div class="stock mb-3 text-warning">
+                                        <% if (getalldata.quantity < 5 && getalldata.quantity>1) { %>
+                                            <span>
+                                                Hurry Only <%= getalldata.quantity%> left!
+                                            </span>
+                                            <% }%>
+                                    </div>
+                                    
                                     <div class="clearfix product-price-cover">
+                                        <% if (getalldata.productPrice !==getalldata.salePrice) { %>
                                         <div class="product-price primary-color float-left">
-                                            <ins><span class="text-brand">₹<%= getalldata.salePrice %></span></ins>
-                                            <ins> <span class="old-price font-md ml-15">₹<%= getalldata.productPrice %>
-                                                        </span></ins>
+                                            <ins><span class="text-brand">₹<%= (getalldata.salePrice).toLocaleString() %></span></ins>
+                                            <ins> <span class="old-price font-md ml-15">₹<%= (getalldata.productPrice).toLocaleString() %>
+                                                        </span>  <% } %></ins>
 
                                         </div>
                                     </div>
@@ -69,39 +77,52 @@
                                     <div class="product_sort_info font-xs mb-30">
                                         <ul>
 
-                                            <!-- <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day Return Policy -->
-                                            <!-- </li> -->
+                                            
                                             <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available</li>
                                         </ul>
                                     </div>
 
+                                    <div class="product-details-cati-tag mt-35">
+                                        <ul>
+                                            <li class="categories-title">Category :<%= getalldata.categoryName.categoryName %></li>
+                                            
+                                                <% if (getalldata.productPrice !==getalldata.salePrice) { %>
+                                                    <li class="d-inline-block text-success ">
+                                                        <strong>
+                                                            <%= getalldata.categoryName.description %>
+                                                        </strong>
+                                                    </li>
+                                                    <% } %>
+                                        </ul>
+                                    </div>
+                                    <br>
+
                                     <div class="attr-detail attr-size">
                                         <strong class="mr-10">Weight</strong>
                                         <ul class="list-filter size-filter font-small">
-                                            <li><a href="#">500gms</a></li>
+                                            
                                             <li class="active"><a href="#">1kg</a></li>
-                                            <li><a href="#">2kg</a></li>
-                                            <li><a href="#">4kg</a></li>
-                                            <li><a href="#">5kg</a></li>
+                                            <!-- <li><a href="#">2kg</a></li>
+                                            <li><a href="#">3kg</a></li> -->
+                                            
 
                                         </ul>
-                                    </div>
-                                    <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                                    <!-- <div class="detail-extralink"> -->
-
                                         <div class="product-extra-link2">
-                                            <!-- <button type="submit" class="button button-add-to-cart" >Add to cart </button> -->
-                                            <a class="button button-add-to-cart" style="display: inline-block; padding: 10px 90px; margin-left: 10px" 
-                                            title="Add To cart"
-                                                onclick = "addToCart(`<%= getalldata._id %>`)">
-                                                <h5 class="ml-0">Addtocart</h5>
-                                            </a>
-                                            
+                                            <div class="product-action-1 show">
+                                                <a aria-label="Add To Cart" class="action-btn hover-up" onclick = "addToCart(`<%= getalldata._id %>`)" ><i
+                                                        class="fi-rs-shopping-bag-add"></i></a>
+                                            </div>
+
 
                                             <!-- <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#"><i
                                                     class="fi-rs-heart"></i></a> -->
                                         </div>
-                                    <!-- </div> -->
+                                    </div>
+                                    <!-- <div class="bt-1 border-color-1 mt-30 mb-30"></div> -->
+
+
+                                        
+                                    
 
                                 </div>
                                 <!-- Detail Info -->
@@ -118,21 +139,52 @@
 
                                 </div>
 
+                                
+                                <div class="comments-area style-2">
+                                        <div class="row">
+                                            <div class="col-lg-8">
+                                                <h4 class="mb-30">Customer Reviews (<%= reviews.length %> )</h4>
+                                                <div class="comment-list">
+                                                    <% if ( reviews.length <1) { %>
+                   
+                                                        <a href="#">Be the first to write your review!</a>
+                                                        <% } else { %>
+                                                    <div class="single-comment justify-content-between d-flex">
+                                                        <div class="user justify-content-between d-flex">
+                                                            <% reviews.forEach(review => { %>
+                                                            <div class="thumb text-center">
+                                                                <img src="<%= review?.user?.image ||"/assets/imgs/page/avaz.png"%>" alt="">
+                                                                <h6><a href="#">Posted By <%= review?.user?.userName %></a></h6>
+                                                            </div>
+                                                            <div class="desc">
+                                                                
+                                                                    
+                                                                        <span><%= review.rating %> Stars </span>
+                                                                    
+                                                                    
+                                                                
+                                                        <p><%= review.review %></p>
+                                                                
+                                                            </div>
+                                                            <% }) %>
 
-                                <div class="social-icons single-share">
-                                    <ul class="text-grey-5 d-inline-block">
+                                                        </div>
 
-                                        <li class="social-facebook"><a href="#"><img
-                                                    src="assets/imgs/theme/icons/icon-facebook.svg" alt=""></a></li>
-                                        <li class="social-twitter"> <a href="#"><img
-                                                    src="assets/imgs/theme/icons/icon-twitter.svg" alt=""></a></li>
-                                        <li class="social-instagram"><a href="#"><img
-                                                    src="assets/imgs/theme/icons/icon-instagram.svg" alt=""></a></li>
-                                        <li class="social-linkedin"><a href="#"><img
-                                                    src="assets/imgs/theme/icons/icon-pinterest.svg" alt=""></a></li>
-                                    </ul>
-                                </div>
+                                                    </div>
+                                                    
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
 
+
+
+
+
+
+                                
 
 
 
@@ -147,4 +199,40 @@
     </section>
 </main>
 
+<style>
+
+.detail-gallery {
+    position: relative;
+}
+
+.main-image img {
+    width: 100%; /* Make the main image fill its container */
+}
+
+.product-image-slider {
+    display: flex;
+    overflow-x: scroll; /* Enable horizontal scrolling for the slider */
+    margin-top: 10px; /* Adjust the margin between the main image and the slider */
+}
+
+.product-image-slider figure {
+    margin-right: 10px; /* Adjust the margin between thumbnail images */
+}
+
+/* Optionally, you can style the zoom icon */
+.zoom-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+
+
+</style>
+<script>
+    function updateMainImage(imageUrl) {
+        document.getElementById('mainProductImage').src = imageUrl;
+    }
+</script>
 <script src="/assets/js/shop/cart.js"></script>

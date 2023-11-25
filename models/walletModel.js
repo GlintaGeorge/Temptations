@@ -8,7 +8,11 @@ const walletSchema = new mongoose.Schema({
     },
     balance: {
         type: Number,
-        default: 0,
+        validate: {
+            validator: Number.isFinite,
+            message: '{VALUE} is not a valid number for balance.',
+        },
+        default: 0,  // Set a default value for balance
     },
 });
 

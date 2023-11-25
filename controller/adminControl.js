@@ -38,7 +38,7 @@ const verifyAdmin = expressHandler(async(req,res)=>{
          if(email === email && req.body.password === password){
               
               req.session.admin = email; 
-            res.render('./admin/pages/index',{title:'dashboard'})
+              res.redirect('/admin/dashboard')
          }else{
             res.render('./admin/pages/login', {adminCheck: 'Invalid Credentials',title:'Login'})
          }
@@ -49,15 +49,7 @@ const verifyAdmin = expressHandler(async(req,res)=>{
 }) 
 
 
-// loadDashboard---  
-const loadDashboard = expressHandler(async(req,res)=>{
 
-    try {
-        res.render('./admin/pages/index',{title:'Dashboard'})
-    } catch (error) {
-        throw new Error(error)
-    }
-})
 
 // UserManagement-- 
 const userManagement = expressHandler(async(req,res)=>{
@@ -337,6 +329,128 @@ const updateCoupon = expressHandler(async (req, res) => {
         }
     } catch (error) {}
 });
+// loadDashboard---  
+const loadDashboard = expressHandler(async (req, res) => {
+    try {
+        const messages = req.flash();
+        const user = req?.user;
+        const recentOrders = await Order.find()
+            .limit(5)
+            .populate({
+                path: "user",
+                select: "firstName lastName image",
+            })
+            .populate("orderItems")
+            .select("totalAmount orderedDate totalPrice")
+            .sort({ _id: -1 });
+
+        let totalSalesAmount = 0;
+        recentOrders.forEach((order) => {
+            totalSalesAmount += order.totalPrice;
+        });
+
+        totalSalesAmount = numeral(totalSalesAmount).format("0.0a");
+
+        const totalSoldProducts = await Product.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    total_sold_count: {
+                        $sum: "$sold",
+                    },
+                },
+            },
+        ]);
+
+        const totalOrderCount = await Order.countDocuments();
+        const totalActiveUserCount = await User.countDocuments({ isBlock: false });
+
+        res.render("admin/pages/dashboard", {
+            title: "Dashboard",
+            user,
+            messages,
+            recentOrders,
+            totalOrderCount,
+            totalActiveUserCount,
+            totalSalesAmount,
+            moment,
+            totalSoldProducts: totalSoldProducts[0].total_sold_count,
+        });
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+const salesReportpage = expressHandler(async (req, res) => {
+    try {
+        res.render("admin/pages/sales-report", { title: "Sales Report" });
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
+const generateSalesReport = async (req, res, next) => {
+    try {
+        const fromDate = new Date(req.query.fromDate);
+        const toDate = new Date(req.query.toDate);
+        const salesData = await Order.find({
+            orderedDate: {
+                $gte: fromDate,
+                $lte: toDate,
+            },
+        }).select("orderId totalPrice orderedDate payment_method -_id");
+
+        res.status(200).json(salesData);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
+
+const getSalesData = async (req, res) => {
+    try {
+        const pipeline = [
+            {
+                $project: {
+                    week: { $isoWeek: "$orderedDate" },
+                    year: { $isoWeekYear: "$orderedDate" },
+                    totalPrice: 1,
+                },
+            },
+            {
+                $group: {
+                    _id: { year: "$year", week: "$week" },
+                    totalSales: { $sum: "$totalPrice" },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    week: {
+                        $concat: [
+                            { $toString: "$_id.year" },
+                            "-W",
+                            {
+                                $cond: {
+                                    if: { $lt: ["$_id.week", 10] },
+                                    then: { $concat: ["0", { $toString: "$_id.week" }] },
+                                    else: { $toString: "$_id.week" },
+                                },
+                            },
+                        ],
+                    },
+                    sales: "$totalSales",
+                },
+            },
+        ];
+
+        const weeklySalesArray = await Order.aggregate(pipeline);
+
+        res.json(weeklySalesArray);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
 
 
 
@@ -358,6 +472,11 @@ module.exports = {
     createCoupon,
     addCoupon,
     couponspage,
+    salesReportpage,
+    generateSalesReport,
+    getSalesData
+   
+
 
 
 

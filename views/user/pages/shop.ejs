@@ -57,20 +57,19 @@
                                             <h2><a href="/products/<%=element?._id%>">
                                                     <%=element.title%>
                                                 </a></h2>
-                                            <div class="rating-result" title="90%">
-                                                <span>
-                                                    <span>90%</span>
-                                                </span>
-                                            </div>
+                                            
                                             <div class="product-price">
 
 
-                                                <span>₹<%= (element.salePrice).toLocaleString() %></span>
+                                                <span><% if (element.productPrice !==element.salePrice) { %> 
+                                                    ₹<%= (element.salePrice).toLocaleString() %>
+                                                     <% } %></span>
                                                 <span class="old-price"> ₹<%= (element.productPrice).toLocaleString() %>
-                                                        </span>
+                                                    <% if (element.productPrice !==element.salePrice) { %>
+                                                    <% } %> </span>
                                             </div>
                                             <div class="product-action-1 show">
-                                                <a aria-label="Add To Cart" class="action-btn hover-up" href="/cart"><i
+                                                <a aria-label="Add To Cart" class="action-btn hover-up" onclick = "addToCart(`<%= element._id %>`)"><i
                                                         class="fi-rs-shopping-bag-add"></i></a>
                                             </div>
                                         </div>
@@ -122,13 +121,32 @@
 
                 </div>
                 <div class="col-lg-3 primary-sidebar sticky-sidebar">
+                    <div class="sidebar-widget mb-50">
+                        <h3 class="sidebar-title">Search Products</h3>
+                        <div class="sidebar-search">
+                            <form>
+                                <input placeholder="Search Products..." type="text" id="search" name="search">
+                                <button><i class="fas fa-search"></i></button>
+                            </form>
+                        </div>        
+                    </div>
+
                     <div class="widget-category mb-30">
                         <h5 class="section-title style-1 mb-30 wow fadeIn animated">Category</h5>
                         <ul class="categories">
-                            <li><a href="shop-grid-right.html">Eggless Cakes</a></li>
-                            <li><a href="shop-grid-right.html">Gourmet Cakes</a></li>
-                            <li><a href="shop-grid-right.html">Designer Cakes</a></li>
+                            <% if (category.length>0) { %>
+                                <% category.forEach(element=> { %>
+                                    <li><a href="/shop?p=<%= currentPage %>&category=<%= element.categoryName %>" <%
+                                            if (selectedCategory && selectedCategory.length>0) { %>
+                                            class="<%= selectedCategory.includes(element._id) ? 'text-dark' : '' %>"
+                                                <% } %>>
+                                                    <%= element.categoryName %>
+                                        </a></li>
+                                    <% }); %>
 
+                                        <% } else { %>
+                                            <h3>NO CATEGORIES</h3>
+                                            <% } %>
                         </ul>
                     </div>
                     <!-- Fillter By Price -->
@@ -138,28 +156,27 @@
                             <div class="bt-1 border-color-1"></div>
                         </div>
                         <div class="price-filter">
-                            <div class="price-filter-inner">
-                                <div id="slider-range"></div>
-                                <div class="price_slider_amount">
-                                    <div class="label-input">
-                                        <span>Range:</span><input type="text" id="amount" name="price"
-                                            placeholder="Add Your Price" />
-                                    </div>
-                                </div>
-                            </div>
+                            <ul>
+                                <li><a href="/shop">
+                                        Default
+                                    </a></li>
+                                <li><a href="#" id="lowToHigh">
+                                        Low to High
+                                    </a></li>
+                                <li><a href="#" id="highToLow">
+                                        High to low
+                                    </a></li>
+                            </ul>
                         </div>
 
-                        <a href="shop-grid-right.html" class="btn btn-sm btn-default"><i class="fi-rs-filter mr-5"></i>
-                            Fillter</a>
+                        
                     </div>
                 </div>
-
-                
-
-
-
             </div>
         </div>
         </div>
     </section>
 </main>
+
+<script src="/assets/js/shop/cart.js"></script>
+<script src="/assets/js/shop/shopping.js"></script>

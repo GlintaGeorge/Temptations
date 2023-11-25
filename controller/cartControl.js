@@ -34,7 +34,7 @@ const cartpage = asyncHandler(async (req, res) => {
                 cartItems: cart,
                 messages,
                 subtotal,
-                total
+                total,
                 
                 
             });

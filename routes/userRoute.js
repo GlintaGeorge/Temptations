@@ -8,6 +8,7 @@ const addressController = require('../controller/addressControl')
 const checkoutController = require("../controller/checkoutControl");
 const orderController = require("../controller/orderControl");
 const methodOverride = require('method-override');
+const moment = require('moment');
 const { ensureNotAuthenticated, ensureAuthenticated } = require('../middlewares/userAuth')
 const validateID = require('../middlewares/idValidation')
 
@@ -16,7 +17,7 @@ userRoute.use((req, res, next) => {
     next();
   })
 
-  userRoute.use(methodOverride('_method'));
+  // userRoute.use(methodOverride('_method'));
 
 // userRoute setting----
 userRoute.get('/', userController.loadLandingPage); /* Loading home page */
@@ -37,7 +38,8 @@ userRoute.get('/about',userController.loadAbout);// loading about page
 userRoute.get('/contact',userController.loadContact);// loading contact page
 userRoute.post('/shop/search', userController.search);// searching....
 
-userRoute.post('/setNewPassword',userController.setNewPassword);// changePassword
+// userRoute.post('/setNewPassword',userController.setNewPassword);// changePassword
+userRoute.post("/review/add/:id", ensureAuthenticated,userController.addReview); // review section
 
 
 // Login & Verification section---
@@ -49,7 +51,13 @@ userRoute.post('/login', ensureNotAuthenticated,
     failureFlash: true, // enable flash messages
   }));
 
-  
+  //<!--profile routes-->
+userRoute.post('/edit-profile', ensureAuthenticated,userController. editProfilePost);
+userRoute.put('/editpsw', ensureAuthenticated, userController.UpdatePassword);
+userRoute.get('/forget',ensureNotAuthenticated,userController.forgetLoad)
+userRoute.post('/forget', ensureAuthenticated,userController.forgetpswd)
+userRoute.get('/forget-password',ensureNotAuthenticated,userController.forgetPswdload)
+userRoute.post('/forget-password',ensureNotAuthenticated, userController.resetPswd)
   
 
 userRoute.get('/products/:id', userController.loadProduct);
@@ -83,7 +91,8 @@ userRoute.post("/update", checkoutController.updateCheckoutPage);
 userRoute.post("/verify-payment", checkoutController.verifyPayment);
 userRoute.post("/coupon", checkoutController.updateCoupon);
 userRoute.get("/coupon/remove", checkoutController.removeAppliedCoupon);
-userRoute.get("/profile/wallet/:id", userController.walletTransactionspage);
+
+userRoute.get("/wallet/:id", userController.walletTransactionspage);
 
 
 
@@ -91,8 +100,8 @@ userRoute.get("/profile/wallet/:id", userController.walletTransactionspage);
 userRoute.get("/orders", orderController.orderspage);
 userRoute.get("/orders/:id", orderController.singleOrder);
 userRoute.put("/orders/:id", orderController.cancelOrder);
-userRoute.post("/orders/single/:id", orderController.cancelSingleOrder);
-userRoute.post("/orders/return/:id", orderController.returnOrder);
+userRoute.put("/orders/single/:id", orderController.cancelSingleOrder);
+// userRoute.post("/orders/return/:id", orderController.returnOrder);
 
 
 

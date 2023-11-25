@@ -16,24 +16,40 @@
                             <div class="col-md-4">
                                 <div class="dashboard-menu">
                                     <ul class="nav flex-column" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab"
+                                                href="#dashboard" role="tab" aria-controls="dashboard"
+                                                aria-selected="false"><i
+                                                    class="fi-rs-settings-sliders mr-10"></i>Dashboard</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="orders-tab"  href="/orders"
+                                             aria-controls="orders" aria-selected="false"><i
+                                                    class="fi-rs-shopping-bag mr-10"></i>Orders</a>
+                                        </li>
                                         <!-- <li class="nav-item">
-                                            <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="false"><i class="fi-rs-settings-sliders mr-10"></i>Dashboard</a>
+                                            <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab"
+                                                href="#track-orders" role="tab" aria-controls="track-orders"
+                                                aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Track
+                                                Your Order</a>
                                         </li> -->
                                         <li class="nav-item">
-                                            <a class="nav-link active" id="account-detail-tab" data-bs-toggle="tab" href="" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Account Details</a>
+                                            <a class="nav-link" id="address-tab" href="/savedAddress"
+                                                aria-controls="address" aria-selected="true"><i
+                                                    class="fi-rs-marker mr-10"></i>My Address</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="orders-tab"  href="/orders"  aria-controls="orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
+                                            <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab"
+                                                href="#account-detail" role="tab" aria-controls="account-detail"
+                                                aria-selected="true"><i class="fi-rs-user mr-10"></i>Account details</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="track-orders-tab"  href="/setNewPassword"  aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Change Password</a>
+                                            <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab"
+                                                href="#change-psw" role="tab" aria-controls="account-detail"
+                                                aria-selected="true"><i class="fi-rs-lock mr-10"></i>change password</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="address-tab" href="/savedAddress"  aria-controls="address" aria-selected="true"><i class="fi-rs-marker mr-10"></i>My Address</a>
-                                        </li>
-                                        
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="/"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
+                                            <a class="nav-link" href="/logout"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -162,51 +178,75 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="tab-pane fade" id="account-detail" role="tabpanel" aria-labelledby="account-detail-tab">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <h5>Account Details</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <p>Already have an account? <a href="/login">Log in instead!</a></p>
-                                                <form method="post" name="enq">
-                                                    <div class="row">
-                                                        <div class="form-group col-md-6">
-                                                            <label>First Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="name" type="text">
-                                                        </div>
-                                                        <div class="form-group col-md-6">
-                                                            <label>Last Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="phone">
-                                                        </div>
-                                                        <div class="form-group col-md-12">
-                                                            <label>Display Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="dname" type="text">
-                                                        </div>
-                                                        <div class="form-group col-md-12">
-                                                            <label>Email Address <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="email" type="email">
-                                                        </div>
-                                                        <div class="form-group col-md-12">
-                                                            <label>Current Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="password" type="password">
-                                                        </div>
-                                                        <div class="form-group col-md-12">
-                                                            <label>New Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="npassword" type="password">
-                                                        </div>
-                                                        <div class="form-group col-md-12">
-                                                            <label>Confirm Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="cpassword" type="password">
-                                                        </div>
-                                                        <div class="col-md-12">
-                                                            <button type="submit" class="btn btn-fill-out submit" name="submit" value="Submit">Save</button>
-                                                        </div>
+                                    <div class="tab-pane fade" id="account-detail" role="tabpanel"
+                                    aria-labelledby="account-detail-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Account Details</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Already have an account? <a href="/login">Log in instead!</a></p>
+
+                                            <form action="/edit-profile" method="POST">
+                                                <div class="row">
+                                                    <div class="form-group col-md-12">
+                                                        <label>Display Name <span class="required">*</span></label>
+                                                        <input required="" type="text" id="userName"
+                                                            class="form-control square" name="userName"
+                                                            value="<%= user.userName %>">
                                                     </div>
-                                                </form>
-                                            </div>
+                                                    <div class="form-group col-md-12">
+                                                        <label>email <span class="required">*</span></label>
+                                                        <input required="" type="email" id="email"
+                                                            class="form-control square" name="email"
+                                                            value="<%= user.email %>">
+                                                    </div>
+
+                                                    <div class="col-md-12">
+                                                        <button type="submit" class="btn btn-fill-out submit"
+                                                            name="submit" value="Submit">Save</button>
+                                                    </div>
+
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="tab-pane fade" id="change-psw" role="tabpanel"
+                                    aria-labelledby="account-detail-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Change Password</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form  method="Put">
+                                                <div class="row">
+
+                                                    <div class="form-group col-md-12">
+                                                        <label for="oldPassword"></label>
+                                                        <input required="" type="password" name="oldPassword"
+                                                            placeholder="oldPassword" id="oldPassword"
+                                                            class="form-control square">
+                                                    </div>
+
+                                                    <div class="form-group col-md-12">
+                                                        <label for="newPassword"></label>
+                                                        <input required="" type="password" name="newPassword"
+                                                            placeholder="newPassword" id="newPassword"
+                                                            class="form-control square">
+                                                    </div>
+
+                                                    <div class="col-md-12">
+                                                        <button type="submit" class="btn btn-fill-out submit"
+                                                            name="submit" value="Submit"
+                                                            onclick="updatePassword()">Save</button>
+                                                    </div>
+
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -215,4 +255,26 @@
             </div>
         </section>
     </main>
+
+    <script>
+        async function updatePassword() {
+          const oldPassword = document.getElementById('oldPassword').value;
+          const newPassword = document.getElementById('newPassword').value;
+               
+          // Send a request to your server with oldPassword and newPassword
+          // (using fetch, axios, or another HTTP library)
+      
+          const response = await fetch('/editpsw', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              // Include any necessary authentication headers
+            },
+            body: JSON.stringify({ oldPassword, newPassword }),
+          });
+      
+          const result = await response.json();
+          console.log(result);
+        }
+      </script>
     

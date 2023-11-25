@@ -1,20 +1,13 @@
-// const errorMessage = document.getElementById('error-message');
-
-// const hide = (element) => {
-//     element.style.display = 'none';
-// }
-
-console.log("asthrullah");
 
 function displayError(inputField, message) {
-    console.log("2")
+
     const errorMessage = inputField.nextElementSibling;
     if (errorMessage && errorMessage.classList.contains('error-message')) {
         errorMessage.textContent = message;
         errorMessage.style.color = 'red';
         setTimeout(function () {
             hideError(inputField);
-            console.log("3")
+            
         }, 5000);
     }
 }
@@ -26,7 +19,7 @@ function hideError(inputField) {
 }
 
 function validateProductForm() {
-    console.log("1")
+    
     const titleInput = document.getElementById('title');
     const descriptionInput = document.getElementById('description');
    
