@@ -138,7 +138,7 @@ exports.placeOrder = asyncHandler(async (userId, addressId, paymentMethod, isWal
         orderItems: orders,
         shippingAddress: address.name,
         town: address.town,
-        // street: address.street,
+       
         state: address.state,
         postCode: address.postCode,
         phone: address.phone,

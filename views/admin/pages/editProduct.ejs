@@ -1,6 +1,16 @@
 <div class="container ">
     <h2 mt-2>Edit Product</h2>
-    <% include('../partials/flash.ejs') %>
+    <!-- //flash -->
+
+    <% if (locals.messages) { %>
+        <% Object.keys(messages).forEach((key) => { %>
+          <% messages[key].forEach((message) => { %>
+            <div class="alert alert-danger alert-dismissible fade show" id="flash-message" role="alert">
+              <strong><%= key === "danger" ? "Error" : key %>!</strong> <%= message %>.
+            </div>
+          <% }) %>
+        <% }) %>
+      <% } %>
         <form action="/admin/product/editProduct/<%= product._id %>" method="post"  onsubmit=" return validateProductForm()">
             <div class="card">
                 <div class="card-body">
@@ -250,3 +260,28 @@
             </script>
 
             <script src="/admin/assets/js/admin/addProductValidation.js"></script>
+            <script>
+                setTimeout(function() {
+                  var alertElements = document.querySelectorAll('.alert');
+                  alertElements.forEach(function(alertElement) {
+                    alertElement.style.display = 'none';
+                  });
+                }, 3000);
+              </script>
+              <style>
+                .alert {
+                    width: 46%;
+                margin: auto;
+                margin-top: 37px;
+                margin-bottom: -72px;
+            }
+            
+            /* This will apply when the screen's width is 600px or less */
+            @media (max-width: 600px) {
+              .alert {
+                width: 100%;
+              }
+            }
+            
+            </style>
+            

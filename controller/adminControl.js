@@ -58,7 +58,7 @@ const userManagement = expressHandler(async(req,res)=>{
      
         const findUsers = await User.find();
             
-        res.render('./admin/pages/userList',{users:findUsers,title:'UserList'})
+        res.render('./admin/pages/userLIst',{users:findUsers,title:'UserList'})
     } catch (error) {
         throw new Error(error) 
     }
@@ -335,7 +335,7 @@ const loadDashboard = expressHandler(async (req, res) => {
         const messages = req.flash();
         const user = req?.user;
         const recentOrders = await Order.find()
-            .limit(5)
+            .limit(3)
             .populate({
                 path: "user",
                 select: "firstName lastName image",
@@ -424,29 +424,29 @@ const getSalesData = async (req, res) => {
         const pipeline = [
             {
                 $project: {
-                    week: { $isoWeek: "$orderedDate" },
-                    year: { $isoWeekYear: "$orderedDate" },
+                    year: { $year: "$orderedDate" },
+                    month: { $month: "$orderedDate" },
                     totalPrice: 1,
                 },
             },
             {
                 $group: {
-                    _id: { year: "$year", week: "$week" },
+                    _id: { year: "$year", month: "$month" },
                     totalSales: { $sum: "$totalPrice" },
                 },
             },
             {
                 $project: {
                     _id: 0,
-                    week: {
+                    month: {
                         $concat: [
                             { $toString: "$_id.year" },
-                            "-W",
+                            "-",
                             {
                                 $cond: {
-                                    if: { $lt: ["$_id.week", 10] },
-                                    then: { $concat: ["0", { $toString: "$_id.week" }] },
-                                    else: { $toString: "$_id.week" },
+                                    if: { $lt: ["$_id.month", 10] },
+                                    then: { $concat: ["0", { $toString: "$_id.month" }] },
+                                    else: { $toString: "$_id.month" },
                                 },
                             },
                         ],
@@ -456,7 +456,90 @@ const getSalesData = async (req, res) => {
             },
         ];
 
-        const weeklySalesArray = await Order.aggregate(pipeline);
+        const monthlySalesArray = await Order.aggregate(pipeline);
+       
+
+        res.json(monthlySalesArray);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+
+/**
+ * Get Sales Data yearly
+ * Method GET
+ */
+const getSalesDataYearly = async (req, res) => {
+    try {
+        const yearlyPipeline = [
+            {
+              $project: {
+                year: { $year: "$orderedDate" },
+                totalPrice: 1,
+              },
+            },
+            {
+              $group: {
+                _id: { year: "$year" },
+                totalSales: { $sum: "$totalPrice" },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                year: { $toString: "$_id.year" },
+                sales: "$totalSales",
+              },
+            },
+          ];
+          
+
+        const yearlySalesArray = await Order.aggregate(yearlyPipeline);
+        
+        res.json(yearlySalesArray);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+/**
+ * get sales data weekly
+ * method get
+ */
+const getSalesDataWeekly =async (req, res) => {
+    try {
+        const weeklySalesPipeline = [
+            {
+              $project: {
+                week: { $week: "$orderedDate" },
+                totalPrice: 1,
+              },
+            },
+            {
+                $group: {
+                    _id: { week: { $mod: ["$week", 7] } },
+                    totalSales: { $sum: "$totalPrice" },
+                  },
+            },
+            {
+              $project: {
+                _id: 0,
+                week: { $toString: "$_id.week" },
+                dayOfWeek: { $add: ["$_id.week", 1] },
+                sales: "$totalSales",
+              },
+            },
+            {
+                $sort: { dayOfWeek: 1 },
+              },
+        ];
+          
+
+        const weeklySalesArray = await Order.aggregate(weeklySalesPipeline);
+        console.log(weeklySalesArray);
 
         res.json(weeklySalesArray);
     } catch (error) {
@@ -487,5 +570,9 @@ module.exports = {
     couponspage,
     salesReportpage,
     generateSalesReport,
-    getSalesData
+    getSalesData,
+    getSalesDataYearly,
+    getSalesDataWeekly,
+
+
    }

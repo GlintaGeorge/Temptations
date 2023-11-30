@@ -39,7 +39,7 @@
                             </div>
                             <div class="form-group">
                                 <div class="d-flex justify-content-center">
-                                    <!-- <input class="button " name="apply_coupon" id="couponBtn" type="button" value="Apply coupon" /> -->
+                                    
                                     <button class="btn  btn-md " name="apply_coupon" id="couponBtn">Apply
                                         Coupon</button>
                                 </div>
@@ -113,7 +113,7 @@
                                                 </div>
                                                 <% }) %>
                                                     <% } else { %> No Address Found
-                                                        <!-- <a class="btn btn-dark h-auto" href="/addAddress">Add Address</a> -->
+                                                        
                                                         <% } %>
                                     </div>
                                 </div>
@@ -661,10 +661,7 @@
                     wltBtn.classList.add("disabled");
                     wltBtn.style.textDecoration = "line-through";
 
-                    // couponList.classList.remove("d-block");
-                    // couponList.classList.add("d-none");
-                    // checkoutBtn.disabled = true;
-                    // checkoutBtn.style.textDecoration = "line-through";
+                    
                 } else if (data.status === "success") {
                     couponError.textContent = data.message + " " + data.coupon.description;
                     couponError.classList.remove("text-danger");

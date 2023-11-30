@@ -32,13 +32,13 @@ userRoute.get('/reSendOTP', ensureNotAuthenticated, userController.reSendOTP); /
 userRoute.post('/reSendOTP', ensureNotAuthenticated, userController.verifyResendOTP);
 
 
-// userRoute.get('/login',userController.loadLogin);/*loading login page */
+
 userRoute.get('/shop',userController.loadShop);// loading shop page
 userRoute.get('/about',userController.loadAbout);// loading about page
 userRoute.get('/contact',userController.loadContact);// loading contact page
 userRoute.post('/shop/search', userController.search);// searching....
 
-// userRoute.post('/setNewPassword',userController.setNewPassword);// changePassword
+
 userRoute.post("/review/add/:id", ensureAuthenticated,userController.addReview); // review section
 
 

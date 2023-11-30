@@ -1,5 +1,4 @@
 const Wallet = require('../models/walletModel')
-// const Transaction = require('../models/transactionModel')
 const WalletTransaction = require("../models/walletTransactionModel");
 const User = require('../models/usermodel')
 const ObjectId = require('mongoose').Types.ObjectId;

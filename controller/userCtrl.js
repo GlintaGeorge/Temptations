@@ -112,23 +112,17 @@ const verifyOTP = asyncHandler(async (req, res) => {
                 delete user.referralCode
             }
             const newUser = await User.create(user);
-            console.log(newUser)
-            console.log(newUser)
-            console.log(newUser)
-
+        
             if (newUser) {
                 const referalCode = generateReferralCode(8)
 
                 const createWallet = await Wallet.create({ user: newUser._id })
-                console.log(createWallet)
-                console.log(createWallet)
-                console.log(createWallet)
-                console.log(createWallet)
+                
 
                 newUser.wallet = createWallet._id
                 newUser.referralCode = referalCode;
                 newUser.save();
-                console.log("usersaved")
+                
                 if (userFound) {
                     await creditforNewUser(newUser)
                 }

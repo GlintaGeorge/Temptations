@@ -72,8 +72,10 @@ adminRoute.post("/coupon/add", adminController.createCoupon);
 adminRoute.post("/coupon/edit/:id", adminController.updateCoupon);
 
 adminRoute.get("/sales-report", adminController.salesReportpage);
-adminRoute.get("/sales-data-weekly", adminController.getSalesData);
+adminRoute.get("/sales-data/yearly", adminController.getSalesDataYearly);
 adminRoute.get("/get/sales-report", adminController.generateSalesReport);
+adminRoute.get("/sales-data", adminController.getSalesData);
+adminRoute.get("/sales-data/weekly", adminController.getSalesDataWeekly);
 
 adminRoute.use((req, res) => {
     res.render("admin/page404", { title: "404", page: "404" });

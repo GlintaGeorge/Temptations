@@ -100,24 +100,6 @@ exports.cancelSingleOrder = asyncHandler(async (req, res) => {
     }
 });
 
-/**
- * Return Order Requst
- * Method POST
- */
-// exports.returnOrder = asyncHandler(async (req, res) => {
-//     try {
-//         const returnOrderItemId = req.params.id;
-//         const result = await returnOrder(returnOrderItemId);
-
-//         if (result === "redirectBack") {
-//             res.redirect("back");
-//         } else {
-//             res.json(result);
-//         }
-//     } catch (error) {
-//         throw new Error(error);
-//     }
-// });
 
 /**
  * Download Invoice
