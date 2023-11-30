@@ -14,6 +14,12 @@ const walletSchema = new mongoose.Schema({
         },
         default: 0,  // Set a default value for balance
     },
+    transactions: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'WalletTransaction',
+        },
+    ]
 });
 
 module.exports = mongoose.model("Wallet", walletSchema);

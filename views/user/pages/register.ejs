@@ -9,51 +9,89 @@
         </div>
     </div>
 
-     <section class="pt-150 pb-150">
+    <section class="pt-150 pb-150">
         <div class="container">
             <div class="row">
                 <div class="col-lg-10 m-auto">
                     <div class="row">
-                        <% if (typeof userCheck !== 'undefined') { %>
+                        <% if (typeof userCheck !=='undefined' ) { %>
                             <div class="alert alert-danger fade show mt-3" id="message" role="alert">
-                              <%- userCheck %>
+                                <%- userCheck %>
                             </div>
                             <% } %>
-                        <div class="col-lg-6">
-                            <div class="login_wrap widget-taber-content p-30 background-white border-radius-5">
-                                <div class="padding_eight_all bg-white">
-                                    <div class="heading_s1">
-                                        <h3 class="mb-30">Create an Account</h3>
-                                    </div>
-                                    <p class="mb-50 font-sm">
-                                        Your personal data will be used to support your experience throughout this
-                                        website, to manage access to your account, and for other purposes described
-                                        in our privacy policy
-                                    </p>
-                                    <div class="alert alert-danger fade show mt-3" id="error-message" role="alert" style="display: none;"></div>
-                                    <div class="login-form">
-                                    <form method="post" onsubmit="return validateForm()">
-                                        <div class="form-group">
-                                            <label for="user-password">Username:</label> 
-                                            <label for="user-name"></label>
-                                            <input type="text" required="" name="userName" placeholder="Username"
-                                                id="user-name">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="user-password">Email:</label> 
-                                            <label for="user-email"></label>
-                                            <input type="email" required="" name="email" placeholder="Email"
-                                                id="user-email">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="user-password">Password:</label>                                            
-                                            <input required="" type="password" name="password"
-                                                placeholder="Password" id="user-password">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="user-repassword">Reenter Password:</label>
-                                            <input required="" type="password" name="repeat-password"
-                                                placeholder="Confirm password" id="user-repassword">
+                                <div class="col-lg-6">
+                                    <div class="login_wrap widget-taber-content p-30 background-white border-radius-5">
+                                        <div class="padding_eight_all bg-white">
+                                            <div class="heading_s1">
+                                                <h3 class="mb-30">Create an Account</h3>
+                                            </div>
+                                            <p class="mb-50 font-sm">
+                                                Your personal data will be used to support your experience throughout
+                                                this
+                                                website, to manage access to your account, and for other purposes
+                                                described
+                                                in our privacy policy
+                                            </p>
+                                            <div class="alert alert-danger fade show mt-3" id="error-message"
+                                                role="alert" style="display: none;"></div>
+                                            <div class="login-form">
+                                                <form method="post" onsubmit="return validateForm()">
+                                                    <div class="form-group">
+                                                        <label for="user-password">Username:</label>
+                                                        <label for="user-name"></label>
+                                                        <input type="text" required="" name="userName"
+                                                            placeholder="Username" id="user-name">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="user-password">Email:</label>
+                                                        <label for="user-email"></label>
+                                                        <input type="email" required="" name="email" placeholder="Email"
+                                                            id="user-email">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="user-password">Password:</label>
+                                                        <input required="" type="password" name="password"
+                                                            placeholder="Password" id="user-password">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="user-repassword">Reenter Password:</label>
+                                                        <input required="" type="password" name="repeat-password"
+                                                            placeholder="Confirm password" id="user-repassword">
+                                                    </div>
+
+
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3 p-3 shadow rounded bg-light">
+                                                            <label for="referralCode" class="form-label">Referral ID</label>
+                                                            <div class="input-group">
+                                                                <input
+                                                                    type="text"
+                                                                    class="form-control"
+                                                                    id="referralCode"
+                                                                    name="referralCode"
+                                                                    value="<%= user?.referralId %>"
+                                                                
+                                                                />
+                                                                <button class="btn btn-secondary" id="copyButton" onclick="copyReferralCode()">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                                                                        <path d="M5 1a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h4zM1 5a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5zm5-2H2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h4a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zm6 0a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h4a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-1a2 2 0 0 1-2-2z"/>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                            <div class="marquee-container mt-2">
+                                                                <p class="text-success marquee">
+                                                                    Invite a friend and earn 100 wallet cash.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    
+
+
+                                            </div>
+
+
                                         </div>
                                         <div class="login_footer form-group">
                                             <div class="chek-form">
@@ -64,30 +102,47 @@
                                                             agree to terms &amp; Policy.</span></label>
                                                 </div>
                                             </div>
-                                        
+
                                         </div>
                                         <div class="form-group">
                                             <button type="submit" class="btn btn-fill-out btn-block hover-up"
                                                 name="login">Submit &amp; Register</button>
                                         </div>
-                                    </form>
+                                        </form>
 
-                                    <% if (typeof  message !== 'undefined') { %>
-                                        <div class="alert alert-success fade show mt-3" id="message" role="alert">
-                                            <%- message %> 
-                                        </div>
-                                        <% } %>
-                                      
+                                        <% if (typeof message !=='undefined' ) { %>
+                                            <div class="alert alert-success fade show mt-3" id="message" role="alert">
+                                                <%- message %>
+                                            </div>
+                                            <% } %>
 
-                                    <div class="text-muted text-center">Already have an account? <a href="/login">Sign in
-                                            now</a></div>
+
+                                                <div class="text-muted text-center">Already have an account? <a
+                                                        href="/login">Sign in
+                                                        now</a></div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section> 
+        </div>
+    </section>
 </main>
 <script src="/assets/js/shop/registerValidation.js"></script>
+<style>
+    .marquee-container {
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .marquee {
+        display: inline-block;
+        animation: marquee 10s linear infinite;
+    }
+
+    @keyframes marquee {
+        0% { transform: translateX(100%); }
+        100% { transform: translateX(-100%); }
+    }
+</style>

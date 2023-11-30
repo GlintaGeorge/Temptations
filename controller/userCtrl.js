@@ -13,6 +13,7 @@ const Review = require('../models/reviewModel')
 const { generateOTP } = require('../utility/nodeMailer'); // Adjust the path accordingly
 const { sendVerifymail } = require('../utility/nodeMailer')
 const { isValidQueryId } = require('../middlewares/idValidation')
+const { generateReferralCode, creditforRefferedUser, creditforNewUser } = require('../helpers/referralHelper')
 const moment = require("moment")
 
 // Index
@@ -21,7 +22,7 @@ const loadLandingPage = async (req, res) => {
         const products = await Product.find({ isListed: true }).populate('images').populate({
             path: 'categoryName',
             select: 'categoryName -_id' // Select only the categoryName field
-        }).limit(4)
+        }).limit(6)
         console.log(products);
 
         // const banner = await Banner.find({ isActive: true })
@@ -36,10 +37,10 @@ const loadLandingPage = async (req, res) => {
 // loading register page---
 const loadRegister = async (req, res) => {
     try {
-        console.log("qqqqqqqqqqqqqq")
+        
         res.render('./user/pages/register')
     } catch (error) {
-        // console.log(error)
+        
         throw new Error(error)
     }
 }
@@ -57,12 +58,16 @@ const insertUser = async (req, res) => {
                 email: req.body.email,
                 password: req.body.password,
             };
+            if (req.body.referralCode !== '') {
+                UserData.referralCode = req.body.referralCode
+            }
+            console.log('data for inserting', UserData);
 
             const OTP = generateOTP() /** otp generating **/
 
             req.session.otpUser = { ...UserData, otp: OTP };
             console.log(req.session.otpUser.otp)
-            // req.session.mail = req.body.email;  
+            
 
             /***** otp sending ******/
             try {
@@ -93,33 +98,58 @@ const sendOTPpage = asyncHandler(async (req, res) => {
 const verifyOTP = asyncHandler(async (req, res) => {
     try {
 
-        // const otp = generateOTP();
-        // req.session.otpUser = otp;
-
         const enteredOTP = req.body.otp;
-        const email = req.session.otpUser.email
         const storedOTP = req.session.otpUser.otp; // Getting the stored OTP from the session
-        console.log(storedOTP);
         const user = req.session.otpUser;
+        console.log('stored otp', storedOTP, 'user', user);
 
         if (enteredOTP == storedOTP) {
+            // if referral is found the reffered user get cashback
+            let userFound = null;
+            if (user.referralCode && user.referralCode !== '') {
+                const referralCode = user.referralCode.trim()
+                userFound = await creditforRefferedUser(referralCode)
+                delete user.referralCode
+            }
             const newUser = await User.create(user);
+            console.log(newUser)
+            console.log(newUser)
+            console.log(newUser)
 
+            if (newUser) {
+                const referalCode = generateReferralCode(8)
+
+                const createWallet = await Wallet.create({ user: newUser._id })
+                console.log(createWallet)
+                console.log(createWallet)
+                console.log(createWallet)
+                console.log(createWallet)
+
+                newUser.wallet = createWallet._id
+                newUser.referralCode = referalCode;
+                newUser.save();
+                console.log("usersaved")
+                if (userFound) {
+                    await creditforNewUser(newUser)
+                }
+            }
             delete req.session.otpUser.otp;
+            if (!userFound && user.referralCode) {
+                req.flash('warning', 'Registration success , Please login , Invalid referral code!')
+            } else {
+                req.flash('success', 'Registration success , Please login')
+            }
             res.redirect('/login');
         } else {
-
-            messages = 'Verification failed, please check the OTP or resend it.';
+            const message = 'Verification failed, please check the OTP or resend it.';
             console.log('verification failed');
-
+            res.render('./user/pages/verifyOTP', { errorMessage: message })
         }
-        res.render('./user/pages/verifyOTP', { messages, email })
-
-
     } catch (error) {
         throw new Error(error);
     }
 });
+
 /**********************************************/
 
 // Resending OTP---
@@ -158,26 +188,45 @@ const verifyResendOTP = asyncHandler(async (req, res) => {
         const user = req.session.otpUser;
 
         if (enteredOTP == storedOTP.otp) {
-            console.log('inside verification');
+            let userFound = null;
+            if (user.referralCode && user.referralCode !== '') {
+                const referralCode = user.referralCode.trim()
+                userFound = await creditforRefferedUser(referralCode)
+                delete user.referralCode
+            }
             const newUser = await User.create(user);
             if (newUser) {
-                console.log('new user insert in resend page', newUser);
-            } else { console.log('error in insert user') }
+                const referalCode = generateReferralCode(8)
+                const createWallet = await Wallet.create({ user: newUser._id })
+                newUser.wallet = createWallet._id
+                newUser.referralCode = referalCode;
+                newUser.save();
+                if (userFound) {
+                    await creditforNewUser(newUser._id)
+                }
+            } else {
+                console.log('error in insert user')
+            }
             delete req.session.otpUser.otp;
+
+            if (!userFound && user.referralCode) {
+                req.flash('warning', 'Registration success , Please login , Invalid referral code!')
+            } else {
+                req.flash('success', 'Registration success , Please login')
+            }
             res.redirect('/login');
         } else {
-            console.log('verification failed');
+            res.redirect('/register')
         }
     } catch (error) {
         throw new Error(error);
     }
 });
 
-
 // loading login page---
 const loadLogin = async (req, res) => {
     try {
-        console.log('10')
+        
         res.render('./user/pages/login')
     } catch (error) {
         throw new Error(error)
@@ -256,13 +305,6 @@ const loadShop = asyncHandler(async (req, res) => {
 
 // Check for price sorting
 if (req.query.sort === 'lowtoHigh') {
-    console.log("1");
-    console.log("1");
-    console.log("1");
-    console.log("1");
-    console.log("1");
-    console.log("1");
-
     sortCriteria.salePrice = 1;
 } else if (req.query.sort === 'highToLow') {
     sortCriteria.salePrice = -1;
@@ -560,7 +602,6 @@ const forgetLoad = async (req, res) => {
 //reset pswd postemail--
 const forgetpswd = async (req, res) => {
     try {
-
         const email = req.body.email
         const user = await User.findOne({ email: email });
         if (user) {

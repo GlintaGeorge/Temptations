@@ -5,13 +5,13 @@ const {
     getReview,
     cancelOrderById,
     cancelSingleOrder,
-    returnOrder,
-    // generateInvoice,
+    generateInvoice,
 } = require("../helpers/orderHelper");
 const OrderItem = require("../models/orderItemModel");
+const moment = require('moment'); 
 
-// const pdfMake = require("pdfmake/build/pdfmake");
-// const vfsFonts = require("pdfmake/build/vfs_fonts");
+const pdfMake = require("pdfmake/build/pdfmake");
+const vfsFonts = require("pdfmake/build/vfs_fonts");
 
 /**
  * Orders Page Route
@@ -44,17 +44,21 @@ exports.singleOrder = asyncHandler(async (req, res) => {
 
         const { order, orders } = await getSingleOrder(orderId);
         const review = await getReview(req.user._id, order.product._id);
+
+        // Pass moment to the template
         res.render("user/pages/singleOrder", {
             title: order.product.title,
             page: order.product.title,
             order,
             review,
             orders,
+            moment: require('moment'), // Add this line
         });
     } catch (error) {
         throw new Error(error);
     }
 });
+
 
 /**
  * Cancel Order Route
@@ -119,24 +123,24 @@ exports.cancelSingleOrder = asyncHandler(async (req, res) => {
  * Download Invoice
  * Method GET
  */
-// exports.donwloadInvoice = asyncHandler(async (req, res) => {
-//     try {
-//         const orderId = req.params.id;
+exports.donwloadInvoice = asyncHandler(async (req, res) => {
+    try {
+        const orderId = req.params.id;
 
-//         const data = await generateInvoice(orderId);
-//         pdfMake.vfs = vfsFonts.pdfMake.vfs;
+        const data = await generateInvoice(orderId);
+        pdfMake.vfs = vfsFonts.pdfMake.vfs;
 
-//         // Create a PDF document
-//         const pdfDoc = pdfMake.createPdf(data);
+        // Create a PDF document
+        const pdfDoc = pdfMake.createPdf(data);
 
-//         // Generate the PDF and send it as a response
-//         pdfDoc.getBuffer((buffer) => {
-//             res.setHeader("Content-Type", "application/pdf");
-//             res.setHeader("Content-Disposition", `attachment; filename=invoices.pdf`);
+        // Generate the PDF and send it as a response
+        pdfDoc.getBuffer((buffer) => {
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader("Content-Disposition", `attachment; filename=invoices.pdf`);
 
-//             res.end(buffer);
-//         });
-//     } catch (error) {
-//         throw new Error(error);
-//     }
-// });
+            res.end(buffer);
+        });
+    } catch (error) {
+        throw new Error(error);
+    }
+});

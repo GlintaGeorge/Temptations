@@ -11,6 +11,16 @@
                     <label for="toDate">To Date:</label>
                     <input type="date" class="form-control" id="toDate" name="endDate" required />
                 </div>
+                <div class="form-group">
+                    <label for="paymentMethod">Payment Method:</label>
+                    <select class="form-control" id="paymentMethod" name="paymentMethod">
+                        <option value="all">All</option>
+                        <option value="cash_on_delivery">Cash On Delivery</option>
+                        <option value="online_payment">Online Payment</option>
+                        <option value="wallet_payment">Wallet Payment</option>
+                        <!-- Add more options for other payment methods -->
+                    </select>
+                </div>
                 <button type="button" class="btn btn-primary" id="generateReport">Generate Report</button>
             </div>
         </div>
@@ -53,6 +63,13 @@
     document.getElementById("generateReport").addEventListener("click", () => {
         const fromDate = document.getElementById("fromDate").value;
         const toDate = document.getElementById("toDate").value;
+        const paymentMethod = document.getElementById("paymentMethod").value;
+        console.log(paymentMethod)
+        console.log(paymentMethod)
+        console.log(paymentMethod)
+        console.log(paymentMethod)
+        console.log(paymentMethod)
+console.log("inside scripte")
         const generateButton = document.getElementById("generateReport");
         const tableContainer = document.getElementById("table");
         const pdfBtn = document.getElementById("pdfBtn");
@@ -63,9 +80,10 @@
         generateButton.setAttribute("disabled", true);
         generateButton.innerHTML = "Generating...";
 
-        fetch("/admin/get/sales-report?fromDate=" + fromDate + "&toDate=" + toDate, {
-            method: "GET",
-        })
+        const url = `/admin/get/sales-report?fromDate=${fromDate}&toDate=${toDate}&paymentMethod=${paymentMethod}`;
+fetch(url, {
+    method: "GET",
+})
             .then((response) => {
                 if (response.ok) {
                     return response.json();

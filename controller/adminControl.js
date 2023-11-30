@@ -196,14 +196,14 @@ console.log(orderId)
 console.log(req.body.status)
 console.log(status)
 const newStatus = req.body.status
-        // const order = await updateOrderStatus(orderId, req.body.status);\
+        
         const order = await OrderItem.findByIdAndUpdate(orderId, { status: newStatus })
         if (req.body.status === status.shipped) {
             order.shippedDate = Date.now();
         } else if (req.body.status === status.delivered) {
             order.deliveredDate = Date.now();
         }
-        console.log("2")
+        
         await order.save();
 
         if (req.body.status === status.cancelled) {
@@ -392,19 +392,32 @@ const generateSalesReport = async (req, res, next) => {
     try {
         const fromDate = new Date(req.query.fromDate);
         const toDate = new Date(req.query.toDate);
+        const paymentMethod = req.query.paymentMethod;
+
+        // Create a filter object based on the selected payment method
+        let paymentMethodFilter;
+        if (paymentMethod !== 'all') {
+            paymentMethodFilter = { payment_method: paymentMethod };
+        } else {
+            paymentMethodFilter = {}; // No specific payment method selected, include all
+        }
+
         const salesData = await Order.find({
             orderedDate: {
                 $gte: fromDate,
                 $lte: toDate,
             },
+            ...paymentMethodFilter,
         }).select("orderId totalPrice orderedDate payment_method -_id");
-
+        
         res.status(200).json(salesData);
     } catch (error) {
         console.error(error);
         next(error);
     }
 };
+
+
 
 const getSalesData = async (req, res) => {
     try {
@@ -475,15 +488,4 @@ module.exports = {
     salesReportpage,
     generateSalesReport,
     getSalesData
-   
-
-
-
-
-
-
-
-
-
-
-}
+   }
