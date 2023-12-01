@@ -75,7 +75,7 @@ const unList = expressHandler(async (req, res) => {
         console.log(id);
 
         const listing = await category.findByIdAndUpdate({ _id: id }, { $set: { isListed: false } })
-        console.log(listing);
+        console.log('category',listing);
         res.redirect('/admin/category')
 
     } catch (error) {
