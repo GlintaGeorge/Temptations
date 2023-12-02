@@ -45,7 +45,7 @@ module.exports = {
     }),
 
     cancelOrderById: asyncHandler(async (orderId) => {
-        console.log("......................"+orderId);
+       
         const order = await Order.findById(orderId).populate("orderItems");
 
         if (order.orderItems.every((item) => item.status === status.cancelled)) {

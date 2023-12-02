@@ -91,6 +91,7 @@ exports.cancelSingleOrder = asyncHandler(async (req, res) => {
         const result = await cancelSingleOrder(orderItemId, req.user._id);
         return res.redirect("/orders");
         if (result === "redirectBack") {
+             res.redirect("back");
            
         } else {
             res.json(result);

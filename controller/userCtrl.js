@@ -342,7 +342,7 @@ if (req.query.sort === 'lowtoHigh') {
         }
 
         const count = await Product.find(filter)
-            // { categoryName: { $in: listedCategoryIds }, isListed: true })
+            
             .countDocuments();
         let selectedCategory = [];
         if (filter.categoryName) {

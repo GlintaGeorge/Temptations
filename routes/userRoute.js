@@ -83,14 +83,14 @@ userRoute.get('/deleteAddress/:id', ensureAuthenticated, addressController.delet
 
 
 // Checkout routes
-userRoute.post("/checkout", checkoutController.checkoutpage);
-userRoute.get("/checkout/get", checkoutController.getCartData);
-userRoute.post("/place-order", checkoutController.placeOrder);
-userRoute.get("/order-placed/:id", checkoutController.orderPlaced);
-userRoute.post("/update", checkoutController.updateCheckoutPage);
-userRoute.post("/verify-payment", checkoutController.verifyPayment);
-userRoute.post("/coupon", checkoutController.updateCoupon);
-userRoute.get("/coupon/remove", checkoutController.removeAppliedCoupon);
+userRoute.post("/checkout", ensureAuthenticated,checkoutController.checkoutpage);
+userRoute.get("/checkout/get", ensureAuthenticated,checkoutController.getCartData);
+userRoute.post("/place-order",ensureAuthenticated, checkoutController.placeOrder);
+userRoute.get("/order-placed/:id",ensureAuthenticated, checkoutController.orderPlaced);
+userRoute.post("/update",ensureAuthenticated, checkoutController.updateCheckoutPage);
+userRoute.post("/verify-payment", ensureAuthenticated,checkoutController.verifyPayment);
+userRoute.post("/coupon",ensureAuthenticated, checkoutController.updateCoupon);
+userRoute.get("/coupon/remove",ensureAuthenticated, checkoutController.removeAppliedCoupon);
 
 userRoute.get("/wallet/:id", userController.walletTransactionspage);
 
