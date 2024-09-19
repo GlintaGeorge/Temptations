@@ -9,7 +9,7 @@ const dbConnect = asyncHandler(async () => {
         mongoose.connect(process.env.MONGO_URL);
         console.log("Database Connected Successfully");
     } catch (error) {
-        throw new Error();
+        console.log("error in mongo db connection",error)
     }
 });
 
